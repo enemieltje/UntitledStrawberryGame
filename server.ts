@@ -14,8 +14,12 @@ export default class HttpServer
 
 	constructor ()
 	{
+		this.addClientFile("images/strawberry.png");
 		this.addClientFile("index.html");
-		this.addClientFile("pixi.js");
+		this.addClientFile("pixi.min.js");
+		// this.addClientFile("pixi.min.js.map");
+		this.addClientFile("game/sprites/strawberry.png");
+		this.addClientFile("strawberry.js");
 	}
 
 	private addClientFile (fileName: string)
@@ -60,11 +64,29 @@ export default class HttpServer
 
 	private httpGet (req: ServerRequest)
 	{
+
+
 		switch (req.url)
 		{
-			case ("/pixi.js"):
-				this.respond(req, 200, "pixi.js");
+			case ("images/strawberry.png"):
+				this.respond(req, 200, "images/strawberry.png");
+				console.debug("responded with strawberry png");
+				break;
+			case ("game/sprites/strawberry.png"):
+				this.respond(req, 200, "game/sprites/strawberry.png");
+				console.debug("responded with strawberry png");
+				break;
+			case ("/pixi.min.js"):
+				this.respond(req, 200, "pixi.min.js");
 				console.debug("responded with pixi js");
+				break;
+			// case ("/pixi.min.js.map"):
+			// 	this.respond(req, 200, "pixi.min.js.map");
+			// 	console.debug("responded with pixi js map");
+			// 	break;
+			case ("/strawberry.js"):
+				this.respond(req, 200, "strawberry.js");
+				console.debug("responded with strawberry js");
 				break;
 			default:
 				this.respond(req, 200, "index.html");
