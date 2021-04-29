@@ -20,24 +20,22 @@ export default class HttpServer
 
 	private addClientFile (fileName: string)
 	{
-		const path = "./src/dashboard/client";
+		const path = "./client";
 		const file = Deno.readTextFileSync(`${path}/${fileName}`);
 		this.clientFiles.set(fileName, file);
 	}
 
-	public start (port = 8080)
+	async start (port = 8080)
 	{
 
 		this.server = serve(`:${port}`);
 		console.log("running server...");
 
+
 		for await (const req of this.server)
 		{
 			console.group(`Request: ${req.method} ${req.url}`);
 
-			// if (acceptable(req))
-			// 	this.webSocketRequest(req);
-			// else
 			this.httpRequest(req);
 
 			console.groupEnd();
