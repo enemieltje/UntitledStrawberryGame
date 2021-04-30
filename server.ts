@@ -65,33 +65,44 @@ export default class HttpServer
 	private httpGet (req: ServerRequest)
 	{
 
+		const path = "./client";
 
-		switch (req.url)
+		try
 		{
-			case ("images/strawberry.png"):
-				this.respond(req, 200, "images/strawberry.png");
-				console.debug("responded with strawberry png");
-				break;
-			case ("game/sprites/strawberry.png"):
-				this.respond(req, 200, "game/sprites/strawberry.png");
-				console.debug("responded with strawberry png");
-				break;
-			case ("/pixi.min.js"):
-				this.respond(req, 200, "pixi.min.js");
-				console.debug("responded with pixi js");
-				break;
-			// case ("/pixi.min.js.map"):
-			// 	this.respond(req, 200, "pixi.min.js.map");
-			// 	console.debug("responded with pixi js map");
-			// 	break;
-			case ("/strawberry.js"):
-				this.respond(req, 200, "strawberry.js");
-				console.debug("responded with strawberry js");
-				break;
-			default:
-				this.respond(req, 200, "index.html");
-				console.debug("responded with index html");
+			const file = Deno.readFileSync(`${path}/${req.url}`);
+			req.respond({status: 200, headers: new Response().headers, body: file});
+		} catch (error)
+		{
+			this.respond(req, 200, "index.html");
+			console.debug("file not found, responded with index html");
 		}
+
+		// switch (req.url)
+		// {
+		// 	case ("images/strawberry.png"):
+		// 		this.respond(req, 200, "images/strawberry.png");
+		// 		console.debug("responded with strawberry png");
+		// 		break;
+		// 	case ("game/sprites/strawberry.png"):
+		// 		this.respond(req, 200, "game/sprites/strawberry.png");
+		// 		console.debug("responded with strawberry png");
+		// 		break;
+		// 	case ("/pixi.min.js"):
+		// 		this.respond(req, 200, "pixi.min.js");
+		// 		console.debug("responded with pixi js");
+		// 		break;
+		// 	// case ("/pixi.min.js.map"):
+		// 	// 	this.respond(req, 200, "pixi.min.js.map");
+		// 	// 	console.debug("responded with pixi js map");
+		// 	// 	break;
+		// 	case ("/strawberry.js"):
+		// 		this.respond(req, 200, "strawberry.js");
+		// 		console.debug("responded with strawberry js");
+		// 		break;
+		// 	default:
+		// 		this.respond(req, 200, "index.html");
+		// 		console.debug("responded with index html");
+		// }
 	}
 
 	private httpPost (req: ServerRequest)
