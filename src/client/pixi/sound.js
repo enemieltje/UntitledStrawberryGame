@@ -1024,7 +1024,7 @@ so just delete it if you don't want it!
 */
 
 function keyboard(value) {
-	let key = {};
+	const key = {};
 	key.value = value;
 	key.isDown = false;
 	key.isUp = true;

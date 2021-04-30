@@ -5,7 +5,7 @@ import
 	ServerRequest,
 	setCookie,
 	Cookie,
-} from "./deps.ts";
+} from "../deps.ts";
 
 export default class HttpServer
 {
@@ -64,7 +64,7 @@ export default class HttpServer
 	private httpGet (req: ServerRequest)
 	{
 
-		const path = "./client";
+		const path = "./src/client";
 		let file: Uint8Array;
 
 		try

@@ -1,4 +1,4 @@
-import HttpServer from "./server.ts";
+import HttpServer from "./src/server.ts";
 
 const server: HttpServer = new HttpServer();
 
