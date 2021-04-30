@@ -14,12 +14,11 @@ export default class HttpServer
 
 	constructor ()
 	{
-		this.addClientFile("images/strawberry.png");
-		this.addClientFile("index.html");
-		this.addClientFile("pixi.min.js");
-		// this.addClientFile("pixi.min.js.map");
-		this.addClientFile("game/sprites/strawberry.png");
-		this.addClientFile("strawberry.js");
+		// this.addClientFile("images/strawberry.png");
+		// this.addClientFile("index.html");
+		// this.addClientFile("pixi.min.js");
+		// this.addClientFile("game/sprites/strawberry.png");
+		// this.addClientFile("strawberry.js");
 	}
 
 	private addClientFile (fileName: string)
@@ -66,16 +65,17 @@ export default class HttpServer
 	{
 
 		const path = "./client";
+		let file: Uint8Array;
 
 		try
 		{
-			const file = Deno.readFileSync(`${path}/${req.url}`);
-			req.respond({status: 200, headers: new Response().headers, body: file});
+			file = Deno.readFileSync(`${path}/${req.url}`);
 		} catch (error)
 		{
-			this.respond(req, 200, "index.html");
+			file = Deno.readFileSync(`${path}/index.html`);
 			console.debug("file not found, responded with index html");
 		}
+		req.respond({status: 200, headers: new Response().headers, body: file});
 
 		// switch (req.url)
 		// {
