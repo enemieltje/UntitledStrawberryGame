@@ -9,13 +9,40 @@ const app = new PIXI.Application({
 document.body.appendChild(app.view);
 
 app.loader
-	.add("game/sprites/strawberry.png")
-	.load(setup);
+	.add("game/sprites/loading.png")
+	.load(loadingScreen);
 
+
+// sprites
 let strawberry;
-let state = walk;
+let loading;
+let ready;
+
+// sounds
 let BeepBox;
 
+// vars
+let state = isLoading;
+
+function loadingScreen(){
+	loading = new PIXI.Sprite(app.loader.resources["game/sprites/loading.png"].texture);
+
+	loading.x = 32;
+	loading.y = 96;
+
+	//Add the sprite to the stage
+	app.stage.addChild(loading);
+
+	loadSprites();
+}
+
+function loadSprites()
+{
+	app.loader
+		.add("game/sprites/strawberry.png")
+		.add("game/sprites/ready.png")
+		.load(loadSounds);
+}
 
 function loadSounds()
 {
@@ -27,22 +54,15 @@ function loadSounds()
 		console.log('Total ' + progress + ' file(s) loaded.');
 		console.log('File ' + res.url + ' just finished loading.');
 	};
-	sounds.whenLoaded = playBeep;
+	sounds.whenLoaded = onLoading;
 
 }
 
-function playBeep()
+function onLoading()
 {
-	BeepBox = sounds["game/sounds/BeepBox-Song.mp3"];
-	BeepBox.play();
-}
-
-function setup()
-{
-	loadSounds();
-
-	//Create the cat sprite
+	//Create the sprites
 	strawberry = new PIXI.Sprite(app.loader.resources["game/sprites/strawberry.png"].texture);
+	ready = new PIXI.Sprite(app.loader.resources["game/sprites/ready.png"].texture);
 
 	//Change the sprite's position
 	strawberry.x = 96;
@@ -50,16 +70,42 @@ function setup()
 	strawberry.vx = 0;
 	strawberry.vy = 0;
 
+	ready.x = 32;
+	ready.y = 96;
 
+	// add ticker
+	app.ticker.add(delta => gameLoop(delta));
+
+	onReady();
+}
+
+function onReady(){
+	state = isReady;
+
+	app.stage.removeChild(loading);
+	app.stage.addChild(ready);
+
+	window.addEventListener(
+		"keydown", onStart, false
+	);
+
+}
+
+function onStart(){
+	window.removeEventListener("keydown", onStart);
+	state = isStart;
+
+	app.stage.removeChild(ready);
+	app.stage.addChild(strawberry);
+
+	BeepBox = sounds["game/sounds/BeepBox-Song.mp3"];
+	BeepBox.play();
+
+	// init keys
 	const w = keyboard("w"),
 		a = keyboard("a"),
 		s = keyboard("s"),
 		d = keyboard("d")
-		space = keyboard(" ")
-
-	space.press = () => {
-		BeepBox.play();
-	}
 
 	w.press = () => {
 		strawberry.vy = -1;
@@ -93,10 +139,6 @@ function setup()
 		else strawberry.vx = -1;
 	};
 
-	//Add the cat to the stage
-	app.stage.addChild(strawberry);
-
-	app.ticker.add(delta => gameLoop(delta));
 }
 
 function gameLoop(delta)
@@ -104,7 +146,15 @@ function gameLoop(delta)
 	state(delta)
 }
 
-function walk(_delta)
+function isLoading(_delta){
+
+}
+
+function isReady(_delta){
+
+}
+
+function isStart(_delta)
 {
 	strawberry.x += strawberry.vx;
 	strawberry.y += strawberry.vy;
