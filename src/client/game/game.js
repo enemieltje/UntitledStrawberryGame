@@ -1,4 +1,4 @@
-
+const backgroundObjects = [];
 let strawberry;
 let loading;
 let ready;
@@ -8,8 +8,6 @@ let beepBox;
 
 // vars
 let stateTick = (_delta) => {};
-let viewportX = 0;
-let viewportY = 0;
 
 // keys
 let walkUp;
@@ -18,25 +16,33 @@ let walkLeft;
 let walkRight;
 
 const app = new PIXI.Application({
-	width: 256,
-	height: 256,
+	width: window.innerWidth,
+	height: window.innerHeight,
 	antialiasing: true,
 	transparent: false,
 	resolution: 1
 });
+document.body.appendChild(app.view);
 
-init();
+const viewport = new pixi_viewport.Viewport({
+	screenWidth: window.innerWidth,
+	screenHeight: window.innerHeight,
+	worldWidth: 2048,
+	worldHeight: 2048,
+	interaction: app.renderer.plugins.interaction
+});
+app.stage.addChild(viewport);
 
-function init ()
-{
-	document.body.appendChild(app.view);
+viewport
+	.drag()
+	.wheel()
+	.clamp({direction: 'all'});
 
-	loadLoadingScreen();
-}
+loadLoadingScreen();
+
 
 function loadLoadingScreen ()
 {
-
 	app.loader
 		.add("game/sprites/loading.png")
 		.load(() =>
@@ -47,7 +53,6 @@ function loadLoadingScreen ()
 
 function loadingScreen ()
 {
-
 	loading = new PIXI.Sprite(app.loader.resources["game/sprites/loading.png"].texture);
 
 
@@ -55,8 +60,7 @@ function loadingScreen ()
 	loading.y = 96;
 
 
-	app.stage.addChild(
-		loading);
+	app.stage.addChild(loading);
 
 	const loaderInstance = new Loader(app);
 	loaderInstance.load().then(() =>
@@ -69,6 +73,7 @@ function loadingScreen ()
 
 function onReady ()
 {
+	strawberry.anchor.set(0.5);
 
 	strawberry.x = 96;
 	strawberry.y = 96;
@@ -105,54 +110,64 @@ function onStart ()
 	app.ticker.add(delta => tick(delta));
 
 	app.stage.removeChild(ready);
-	app.stage.addChild(strawberry);
+
+	backgroundObjects.forEach(object =>
+	{
+		viewport.addChild(object);
+	});
+
+	viewport.addChild(strawberry);
+	viewport.follow(strawberry, {radius: 192});
 
 	BeepBox = sounds["game/sounds/BeepBox-Song.mp3"];
 	BeepBox.play();
 
+
+
+	let speed = 2;
 	walkUp.press = () =>
 	{
-		strawberry.vy = -1;
+		strawberry.vy = -speed;
 	};
 
 	walkUp.release = () =>
 	{
 		if (walkDown.isUp) strawberry.vy = 0;
-		else strawberry.vy = 1;
+		else strawberry.vy = speed;
 	};
 
 
 	walkLeft.press = () =>
 	{
-		strawberry.vx = -1;
+		strawberry.vx = -speed;
 	};
 
 	walkLeft.release = () =>
 	{
 		if (walkRight.isUp) strawberry.vx = 0;
-		else strawberry.vx = 1;
+		else strawberry.vx = speed;
 	};
 
 	walkDown.press = () =>
 	{
-		strawberry.vy = 1;
+		strawberry.vy = speed;
 	};
 
 	walkDown.release = () =>
 	{
 		if (walkUp.isUp) strawberry.vy = 0;
-		else strawberry.vy = -1;
+		else strawberry.vy = -speed;
 	};
 
 	walkRight.press = () =>
 	{
-		strawberry.vx = 1;
+		strawberry.vx = speed;
 	};
 
 	walkRight.release = () =>
 	{
 		if (walkLeft.isUp) strawberry.vx = 0;
-		else strawberry.vx = -1;
+		else strawberry.vx = -speed;
 	};
 }
 
