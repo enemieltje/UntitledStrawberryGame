@@ -12,7 +12,7 @@
 		"editor.defaultFormatter": "vscode.json-language-features"
 	},
 	"[javascript]": {
-		"editor.defaultFormatter": "vscode.javascript-language-features"
+		"editor.defaultFormatter": "vscode.typescript-language-features"
 	},
 	//todo add html formater
 	"editor.mouseWheelZoom": true,
