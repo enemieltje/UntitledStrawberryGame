@@ -1,0 +1,232 @@
+{
+	"frames": {
+		"bg0.png": {
+			"frame": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 64
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 64
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 64
+			},
+			"pivot": {
+				"x": 0.5,
+				"y": 0.5
+			}
+		},
+		"bg1.png": {
+			"frame": {
+				"x": 64,
+				"y": 0,
+				"w": 64,
+				"h": 64
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 64
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 64
+			},
+			"pivot": {
+				"x": 0.5,
+				"y": 0.5
+			}
+		},
+		"bg2.png": {
+			"frame": {
+				"x": 128,
+				"y": 0,
+				"w": 64,
+				"h": 64
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 64
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 64
+			},
+			"pivot": {
+				"x": 0.5,
+				"y": 0.5
+			}
+		},
+		"bg3.png": {
+			"frame": {
+				"x": 0,
+				"y": 64,
+				"w": 64,
+				"h": 64
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 64
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 64
+			},
+			"pivot": {
+				"x": 0.5,
+				"y": 0.5
+			}
+		},
+		"bg4.png": {
+			"frame": {
+				"x": 64,
+				"y": 64,
+				"w": 64,
+				"h": 64
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 64
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 64
+			},
+			"pivot": {
+				"x": 0.5,
+				"y": 0.5
+			}
+		},
+		"bg5.png": {
+			"frame": {
+				"x": 128,
+				"y": 64,
+				"w": 64,
+				"h": 64
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 64
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 64
+			},
+			"pivot": {
+				"x": 0.5,
+				"y": 0.5
+			}
+		},
+		"bg6.png": {
+			"frame": {
+				"x": 0,
+				"y": 128,
+				"w": 64,
+				"h": 64
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 64
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 64
+			},
+			"pivot": {
+				"x": 0.5,
+				"y": 0.5
+			}
+		},
+		"bg7.png": {
+			"frame": {
+				"x": 64,
+				"y": 128,
+				"w": 64,
+				"h": 64
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 64
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 64
+			},
+			"pivot": {
+				"x": 0.5,
+				"y": 0.5
+			}
+		},
+		"bg8.png": {
+			"frame": {
+				"x": 128,
+				"y": 128,
+				"w": 64,
+				"h": 64
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 64
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 64
+			},
+			"pivot": {
+				"x": 0.5,
+				"y": 0.5
+			}
+		}
+	},
+	"meta": {
+		"app": "http://www.codeandweb.com/texturepacker",
+		"version": "1.0",
+		"image": "tileset.png",
+		"format": "RGBA8888",
+		"size": {
+			"w": 196,
+			"h": 196
+		},
+		"scale": "1",
+		"smartupdate": "$TexturePacker:SmartUpdate:51ede84c7a85e4d6aeb31a6020a20858:3923663e59fb40b578d66a492a2cda2d:9995f8b4db1ac3cb75651b1542df8ee2$"
+	}
+}

@@ -4,6 +4,7 @@ let loading;
 let ready;
 
 // sounds
+// deno-lint-ignore no-unused-vars
 let beepBox;
 
 // vars
@@ -17,7 +18,7 @@ let walkRight;
 
 const app = new PIXI.Application({
 	width: window.innerWidth,
-	height: window.innerHeight,
+	height: window.innerHeight - 4,
 	antialiasing: true,
 	transparent: false,
 	resolution: 1
@@ -26,7 +27,7 @@ document.body.appendChild(app.view);
 
 const viewport = new pixi_viewport.Viewport({
 	screenWidth: window.innerWidth,
-	screenHeight: window.innerHeight,
+	screenHeight: window.innerHeight - 4,
 	worldWidth: 2048,
 	worldHeight: 2048,
 	interaction: app.renderer.plugins.interaction
@@ -124,7 +125,7 @@ function onStart ()
 
 
 
-	let speed = 2;
+	const speed = 2;
 	walkUp.press = () =>
 	{
 		strawberry.vy = -speed;
