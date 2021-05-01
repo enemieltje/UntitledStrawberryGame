@@ -89,12 +89,6 @@ function onReady ()
 	app.stage.removeChild(loading);
 	app.stage.addChild(ready);
 
-	// init keys
-	walkUp = keyboard("w");
-	walkLeft = keyboard("a");
-	walkDown = keyboard("s");
-	walkRight = keyboard("d");
-
 	window.addEventListener(
 		"keydown",
 		onStart, false
@@ -123,53 +117,8 @@ function onStart ()
 	BeepBox = sounds["game/sounds/BeepBox-Song.mp3"];
 	BeepBox.play();
 
+	strawberry.setup();
 
-
-	const speed = 2;
-	walkUp.press = () =>
-	{
-		strawberry.vy = -speed;
-	};
-
-	walkUp.release = () =>
-	{
-		if (walkDown.isUp) strawberry.vy = 0;
-		else strawberry.vy = speed;
-	};
-
-
-	walkLeft.press = () =>
-	{
-		strawberry.vx = -speed;
-	};
-
-	walkLeft.release = () =>
-	{
-		if (walkRight.isUp) strawberry.vx = 0;
-		else strawberry.vx = speed;
-	};
-
-	walkDown.press = () =>
-	{
-		strawberry.vy = speed;
-	};
-
-	walkDown.release = () =>
-	{
-		if (walkUp.isUp) strawberry.vy = 0;
-		else strawberry.vy = -speed;
-	};
-
-	walkRight.press = () =>
-	{
-		strawberry.vx = speed;
-	};
-
-	walkRight.release = () =>
-	{
-		if (walkLeft.isUp) strawberry.vx = 0;
-		else strawberry.vx = -speed;
-	};
 }
 
 function tick (delta)
