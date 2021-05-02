@@ -31,54 +31,50 @@ class Strawberry extends GameObject
 
 		this.sprite.anchor.set(0.5);
 
-		this.ay = 0.1;
+		// this.ay = 0.1;
 
 		this.sprite.x = 96;
 		this.sprite.y = 96;
 
 		this.walkUp.press = () =>
 		{
-			this.vy = -this.speed;
+			this.vy += -this.speed;
 		};
 
 		this.walkUp.release = () =>
 		{
-			if (this.walkDown.isUp) this.vy = 0;
-			else this.vy = this.speed;
+			this.vy -= -this.speed;
 		};
 
 
 		this.walkLeft.press = () =>
 		{
-			this.vx = -this.speed;
+			this.vx += -this.speed;
 		};
 
 		this.walkLeft.release = () =>
 		{
-			if (this.walkRight.isUp) this.vx = 0;
-			else this.vx = this.speed;
+			this.vx -= -this.speed;
 		};
 
 		this.walkDown.press = () =>
 		{
-			this.vy = this.speed;
+			this.vy += this.speed;
 		};
 
 		this.walkDown.release = () =>
 		{
-			if (this.walkUp.isUp) this.vy = 0;
-			else this.vy = -this.speed;
+			this.vy -= this.speed;
 		};
 
 		this.walkRight.press = () =>
 		{
-			this.vx = this.speed;
+			this.vx += this.speed;
 		};
 
 		this.walkRight.release = () =>
 		{
-			if (this.walkLeft.isUp) this.vx = 0;
-			else this.vx = -this.speed;
+			this.vx -= this.speed;
 		};
 	}
 
