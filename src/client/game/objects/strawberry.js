@@ -1,4 +1,4 @@
-class Strawberry extends PIXI.Sprite
+class Strawberry extends GameObject
 {
 
 	walkUp = keyboard("w");
@@ -8,19 +8,31 @@ class Strawberry extends PIXI.Sprite
 
 	speed = 2;
 
+	vx = 0;
+	vy = 0;
+
+	ax = 0;
+	ay = 0;
+
 	constructor ()
 	{
-		super(app.loader.resources["game/sprites/strawberry.png"].texture);
+		// super(app.loader.resources["game/sprites/strawberry.png"].texture);
+		super("strawberry");
 	}
 
-	walk ()
+	onLoad ()
 	{
-		this.x += this.vx;
-		this.y += this.vy;
+		super.onLoad();
 	}
 
-	setup ()
+	onCreate ()
 	{
+		super.onCreate();
+
+		this.sprite.anchor.set(0.5);
+
+		this.sprite.x = 96;
+		this.sprite.y = 96;
 
 		this.walkUp.press = () =>
 		{
@@ -66,6 +78,11 @@ class Strawberry extends PIXI.Sprite
 			if (this.walkLeft.isUp) this.vx = 0;
 			else this.vx = -this.speed;
 		};
+	}
 
+	step ()
+	{
+		this.sprite.x += this.vx;
+		this.sprite.y += this.vy;
 	}
 }

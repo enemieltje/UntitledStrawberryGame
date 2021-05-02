@@ -1,7 +1,8 @@
-const backgroundObjects = [];
-let strawberry;
+// const backgroundObjects = [];
+// let strawberry;
 let loading;
-let ready;
+// let ready;
+const gameObjects = {};
 
 // sounds
 // deno-lint-ignore no-unused-vars
@@ -56,14 +57,12 @@ function loadingScreen ()
 {
 	loading = new PIXI.Sprite(app.loader.resources["game/sprites/loading.png"].texture);
 
-
 	loading.x = 32;
 	loading.y = 96;
 
-
 	app.stage.addChild(loading);
 
-	const loaderInstance = new Loader(app);
+	const loaderInstance = new Loader();
 	loaderInstance.load().then(() =>
 	{
 		console.log("ready!");
@@ -74,20 +73,8 @@ function loadingScreen ()
 
 function onReady ()
 {
-	strawberry.anchor.set(0.5);
-
-	strawberry.x = 96;
-	strawberry.y = 96;
-
-	strawberry.vx = 0;
-	strawberry.vy = 0;
-
-	ready.x = 32;
-	ready.y = 96;
-
-
 	app.stage.removeChild(loading);
-	app.stage.addChild(ready);
+	app.stage.addChild(gameObjects["ready"].sprite);
 
 	window.addEventListener(
 		"keydown",
@@ -104,21 +91,18 @@ function onStart ()
 
 	app.ticker.add(delta => tick(delta));
 
-	app.stage.removeChild(ready);
+	app.stage.removeChild(gameObjects["ready"].sprite);
 
-	backgroundObjects.forEach(object =>
+	gameObjects["background"].sprite.forEach(object =>
 	{
 		viewport.addChild(object);
 	});
 
-	viewport.addChild(strawberry);
-	viewport.follow(strawberry, {radius: 192});
+	viewport.addChild(gameObjects["strawberry"].sprite);
+	viewport.follow(gameObjects["strawberry"].sprite, {radius: 192});
 
 	BeepBox = sounds["game/sounds/BeepBox-Song.mp3"];
 	BeepBox.play();
-
-	strawberry.setup();
-
 }
 
 function tick (delta)
@@ -128,5 +112,5 @@ function tick (delta)
 
 function walkTick (_delta)
 {
-	strawberry.walk();
+	gameObjects["strawberry"].step();
 }
