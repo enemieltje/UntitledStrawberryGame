@@ -32,6 +32,7 @@ class Loader
 			gameObjects["strawberry"] = new Strawberry();
 			gameObjects["ready"] = new Ready();
 			gameObjects["background"] = new Background();
+			gameObjects["block"] = new Block();
 
 			Object.keys(gameObjects).forEach(objectName =>
 			{

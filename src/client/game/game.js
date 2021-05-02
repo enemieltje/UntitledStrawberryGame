@@ -98,6 +98,12 @@ function onStart ()
 		viewport.addChild(object);
 	});
 
+	gameObjects["block"].sprite.forEach(object =>
+	{
+		viewport.addChild(object);
+	});
+
+
 	viewport.addChild(gameObjects["strawberry"].sprite);
 	viewport.follow(gameObjects["strawberry"].sprite, {radius: 192});
 
@@ -112,5 +118,6 @@ function tick (delta)
 
 function walkTick (_delta)
 {
+	gameObjects["strawberry"].collision();
 	gameObjects["strawberry"].step();
 }

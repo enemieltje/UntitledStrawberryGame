@@ -31,7 +31,7 @@ class Strawberry extends GameObject
 
 		this.sprite.anchor.set(0.5);
 
-		// this.ay = 0.1;
+		this.ay = 0.1;
 
 		this.sprite.x = 96;
 		this.sprite.y = 96;
@@ -45,7 +45,6 @@ class Strawberry extends GameObject
 		{
 			this.vy -= -this.speed;
 		};
-
 
 		this.walkLeft.press = () =>
 		{
@@ -83,8 +82,34 @@ class Strawberry extends GameObject
 		this.vx += this.ax;
 		this.vy += this.ay;
 
+		if (this.collision())
+		{
+			this.vy = 0;
+			this.sprite.y -= 1;
+		}
 
 		this.sprite.x += this.vx;
 		this.sprite.y += this.vy;
+	}
+
+	collision ()
+	{
+		// gameObjects["block"].sprite.forEach(object =>
+		// {
+		// 	if (hitTestRectangle(this.sprite, object))
+		// 	{
+		// 		const side = contain(explorer, {x: object.x, y: object.y, width: object.width, height: object.height});
+
+		// 		console.log(side);
+		// 	};
+		// });
+
+		if (gameObjects["block"].isAtPos(this.sprite.x, this.sprite.y + this.sprite.height / 2 + 1))
+		{
+			console.log("yes");
+			return true;
+		}
+		// else console.log("no");
+		return false;
 	}
 }
