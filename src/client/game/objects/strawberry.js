@@ -31,6 +31,8 @@ class Strawberry extends GameObject
 
 		this.sprite.anchor.set(0.5);
 
+		this.ay = 0.1;
+
 		this.sprite.x = 96;
 		this.sprite.y = 96;
 
@@ -82,6 +84,10 @@ class Strawberry extends GameObject
 
 	step ()
 	{
+		this.vx += this.ax;
+		this.vy += this.ay;
+
+
 		this.sprite.x += this.vx;
 		this.sprite.y += this.vy;
 	}
