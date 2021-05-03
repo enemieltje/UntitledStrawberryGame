@@ -10,6 +10,7 @@ let beepBox;
 
 // vars
 let stateTick = (_delta) => {};
+const bump = new Bump(PIXI);
 
 // keys
 let walkUp;
@@ -118,6 +119,5 @@ function tick (delta)
 
 function walkTick (_delta)
 {
-	gameObjects["strawberry"].collision();
 	gameObjects["strawberry"].step();
 }

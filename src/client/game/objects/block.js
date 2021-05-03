@@ -8,31 +8,43 @@ class Block extends GameObject
 
 	onLoad ()
 	{
-		const rectangle = new PIXI.Graphics();
-		// rectangle.lineStyle(4, 0x000000, 1);
-		rectangle.beginFill(0x000000);
-		rectangle.wth = 512;
-		rectangle.hgt = 16;
-		rectangle.drawRect(0, 0, rectangle.wth, rectangle.hgt);
-		rectangle.endFill();
-		rectangle.x = 32;
-		rectangle.y = 256;
-
-		this.sprite.push(rectangle);
+		super.onLoad();
 	}
 
-	onCreate () {}
-
-	isAtPos (x, y)
+	onCreate ()
 	{
-		let col = false;
-		this.sprite.forEach(shape =>
+		const coords = [];
+		for (let i = 0; i < 10; i++)
 		{
-			const xCol = x >= shape.x && x < shape.x + shape.wth;
-			const yCol = y >= shape.y && y < shape.y + shape.hgt;
-			if (xCol && yCol) col = true;
-			// console.log(`x: ${x}, y: ${y}, shape.x: ${shape.x}, shape.y: ${shape.y}, width: ${shape.wth}, height: ${shape.hgt}`);
+			coords.push([i + 1, 4]);
+			// this.createBlock(64 * i + 64, 256);
+		}
+
+		coords.push(
+			[12, 6],
+			[13, 6],
+			[15, 3],
+			[15, 4],
+			[15, 5],
+			[15, 6],
+			[16, 6],
+		);
+		this.createBlockArray(coords);
+	}
+
+	createBlock (x, y)
+	{
+		const pixiSprite = new PIXI.Sprite(app.loader.resources[`game/sprites/${this.name}.png`].texture);
+		pixiSprite.x = x * pixiSprite.width;
+		pixiSprite.y = y * pixiSprite.height;
+		this.sprite.push(pixiSprite);
+	}
+
+	createBlockArray (coords)
+	{
+		coords.forEach(coord =>
+		{
+			this.createBlock(coord[0], coord[1]);
 		});
-		return col;
 	}
 }
