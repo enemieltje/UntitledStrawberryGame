@@ -1,54 +1,33 @@
 class Loader
 {
-	spritesReady = false;
-	soundsReady = false;
-	ready = false;
+	// will be done automatically for each object file
+	static objectTypes = [Strawberry, Ready, Background, Block];
+
+	static spritesReady = false;
+	static soundsReady = false;
+	static ready = false;
 
 	constructor ()
 	{
 	}
 
-	load ()
+	static load ()
 	{
 		return new Promise((resolve) =>
 		{
-			this.loadSprites().then(() =>
+			Loader.loadSprites().then(() =>
 			{
-				if (this.soundsReady) resolve();
+				if (Loader.soundsReady) resolve();
 			});
 
-			this.loadSounds().then(() =>
+			Loader.loadSounds().then(() =>
 			{
-				if (this.spritesReady) resolve();
+				if (Loader.spritesReady) resolve();
 			});
 		});
 	}
 
-	loadSprites ()
-	{
-		console.log("Loading Sprites");
-		return new Promise(resolve =>
-		{
-			gameObjects["strawberry"] = new Strawberry();
-			gameObjects["ready"] = new Ready();
-			gameObjects["background"] = new Background();
-			gameObjects["block"] = new Block();
-
-			Object.keys(gameObjects).forEach(objectName =>
-			{
-				gameObjects[objectName].onLoad();
-			});
-
-			app.loader
-				.load(() =>
-				{
-					this.createSprites();
-					resolve();
-				});
-		});
-	}
-
-	loadSounds ()
+	static loadSounds ()
 	{
 		return new Promise(resolve =>
 		{
@@ -73,29 +52,53 @@ class Loader
 
 			sounds.whenLoaded = () =>
 			{
-				this.soundsReady = true;
+				Loader.soundsReady = true;
 				resolve();
-				this.init();
+				Loader.init();
 			};
 		});
 	}
 
-	createSprites ()
+	static loadSprites ()
 	{
-		console.log("Sprites finished loading");
-		Object.keys(gameObjects).forEach(objectName =>
+		console.log("Loading Sprites");
+		return new Promise(resolve =>
 		{
-			gameObjects[objectName].onCreate();
+
+			Loader.objectTypes.forEach(object =>
+			{
+				object.onLoad();
+			});
+
+			app.loader
+				.load(() =>
+				{
+					console.log("Sprites finished loading");
+					Loader.createSprites();
+					resolve();
+				});
 		});
-		this.spritesReady = true;
-		this.init();
 	}
 
-	init ()
+	static createSprites ()
 	{
-		if (!this.spritesReady || !this.soundsReady) return;
+		console.log("Creating Sprites");
 
-		this.ready = true;
+		Loader.objectTypes.forEach(object =>
+		{
+			object.create();
+		});
+
+		console.log("Sprites finished creating");
+		Loader.spritesReady = true;
+		Loader.init();
+	}
+
+	static init ()
+	{
+		if (!Loader.spritesReady || !Loader.soundsReady) return;
+
+		Loader.ready = true;
 
 	}
 

@@ -1,23 +1,30 @@
 class Block extends GameObject
 {
-	constructor ()
+	static name = "block";
+
+	constructor (x, y)
 	{
-		super("block");
-		this.sprite = [];
+		super(Block.name, x, y);
+		this.applyPhisics = true;
+		this.sprite.mass = 10000000;
+		// this.sprite = [];
 	}
 
-	onLoad ()
+	static onLoad ()
 	{
-		super.onLoad();
+		super.onLoad([this.name]);
 	}
 
-	onCreate ()
+	static create ()
 	{
+		gameObjects.block = [];
+		// super.onCreate();
+		// this.applyPhisics = true;
+
 		const coords = [];
 		for (let i = 0; i < 10; i++)
 		{
 			coords.push([i + 1, 4]);
-			// this.createBlock(64 * i + 64, 256);
 		}
 
 		coords.push(
@@ -29,22 +36,11 @@ class Block extends GameObject
 			[15, 6],
 			[16, 6],
 		);
-		this.createBlockArray(coords);
-	}
 
-	createBlock (x, y)
-	{
-		const pixiSprite = new PIXI.Sprite(app.loader.resources[`game/sprites/${this.name}.png`].texture);
-		pixiSprite.x = x * pixiSprite.width;
-		pixiSprite.y = y * pixiSprite.height;
-		this.sprite.push(pixiSprite);
-	}
-
-	createBlockArray (coords)
-	{
 		coords.forEach(coord =>
 		{
-			this.createBlock(coord[0], coord[1]);
+			GameData.storeObject(new Block(coord[0] * 64, coord[1] * 64), this.name);
+			// gameObjects.block.push(new Block(coord[0] * 64, coord[1] * 64));
 		});
 	}
 }

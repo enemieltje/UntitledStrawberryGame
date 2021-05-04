@@ -1,13 +1,20 @@
 class Ready extends GameObject
 {
+	static name = "ready";
 	constructor ()
 	{
-		super("ready");
+		super(Ready.name, 32, 96);
 	}
 
-	onLoad ()
+	static onLoad ()
 	{
-		super.onLoad();
+		super.onLoad([this.name]);
+	}
+
+	static create ()
+	{
+		GameData.storeObject(new Ready(), this.name);
+		// gameObjects.ready = new Ready();
 	}
 
 	onCreate ()

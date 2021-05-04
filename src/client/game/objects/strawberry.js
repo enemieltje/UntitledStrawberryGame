@@ -1,5 +1,6 @@
 class Strawberry extends GameObject
 {
+	static name = "strawberry";
 
 	walkUp = keyboard("w");
 	walkLeft = keyboard("a");
@@ -9,23 +10,32 @@ class Strawberry extends GameObject
 	speed = 2;
 	jumpHeight = 6;
 
-	vx = 0;
-	vy = 0;
+	// vx = 0;
+	// vy = 0;
 
-	ax = 0;
-	ay = 0;
+	// ax = 0;
+	// ay = 0;
 
 	// gravity = 0;
 
 	constructor ()
 	{
-		// super(app.loader.resources["game/sprites/strawberry.png"].texture);
-		super("strawberry");
+		super(Strawberry.name, 96, 96);
+		this.sprite.anchor.set(0.5);
+		this.sprite.ay = 0.1;
+		this.applyPhisics = true;
+		this.walkSetup();
 	}
 
-	onLoad ()
+	static onLoad ()
 	{
-		super.onLoad();
+		super.onLoad([this.name]);
+	}
+
+	static create ()
+	{
+		GameData.storeObject(new Strawberry(), this.name);
+		// gameObjects["strawberry"] = new Strawberry();
 	}
 
 	onCreate ()
@@ -34,7 +44,8 @@ class Strawberry extends GameObject
 		this.sprite.anchor.set(0.5);
 		this.sprite.x = 96;
 		this.sprite.y = 96;
-		this.ay = 6;
+		this.ay = 0.1;
+		this.applyPhisics = true;
 		this.walkSetup();
 	}
 
@@ -44,84 +55,89 @@ class Strawberry extends GameObject
 		{
 			let validJump = false;
 			const rect = new PIXI.Rectangle(this.sprite.x - this.sprite.width / 2, this.sprite.y + this.sprite.width / 2, this.sprite.width, 1);
-			gameObjects["block"].sprite.forEach(block =>
+			GameData.getObjectArrayFromName("block").forEach(block =>
 			{
-				const blockRect = new PIXI.Rectangle(block.x, block.y, block.width, block.height);
+				const blockRect = new PIXI.Rectangle(block.sprite.x, block.sprite.y, block.sprite.width, block.sprite.height);
 				if (bump.hitTestRectangle(rect, blockRect))
 				{
 					validJump = true;
 				}
 			});
-			if (validJump) this.vy += -this.jumpHeight;
+			if (validJump) this.sprite.vy += -this.jumpHeight;
+
+			// this.sprite.vy += -this.speed;
+
 		};
 
 		this.walkUp.release = () =>
 		{
-			// this.vy -= -this.speed / 2;
+			// this.sprite.vy -= -this.speed / 2;
 
-			// this.vy = 0;
+			// this.sprite.vy = 0;
 			// if (this.walkDown.isDown) this.walkDown.press();
 		};
 
 		this.walkLeft.press = () =>
 		{
-			this.vx += -this.speed;
+			this.sprite.vx += -this.speed;
 		};
 
 		this.walkLeft.release = () =>
 		{
-			this.vx = 0;
+			this.sprite.vx = 0;
 			if (this.walkRight.isDown) this.walkRight.press();
 		};
 
 		this.walkDown.press = () =>
 		{
-			// this.vy += this.speed;
+			// this.sprite.vy += this.speed;
 		};
 
 		this.walkDown.release = () =>
 		{
-			// this.vy = 0;
+			// this.sprite.vy = 0;
 			// if (this.walkUp.isDown) this.walkUp.press();
 		};
 
 		this.walkRight.press = () =>
 		{
-			this.vx += this.speed;
+			this.sprite.vx += this.speed;
 		};
 
 		this.walkRight.release = () =>
 		{
-			this.vx = 0;
+			this.sprite.vx = 0;
 			if (this.walkLeft.isDown) this.walkLeft.press();
 		};
 	}
 
-	step ()
+	step (delta)
 	{
-		this.vx += this.ax / 60;
-		this.vy += this.ay / 60;
+		super.step(delta);
 
-		this.sprite.x += this.vx;
-		this.sprite.y += this.vy;
+		// this.vx += this.ax / 60;
+		// this.vy += this.ay / 60;
 
-		bump.hit(this.sprite, gameObjects["block"].sprite, true, false, false,
-			(side, _block) =>
-			{
-				switch (side)
-				{
-					case "left":
-					case "right":
-						this.vx = 0;
-						break;
-					case "top":
-					case "bottom":
-						this.vy = 0;
-						break;
-					default:
-				}
-			}
-		);
+		// this.sprite.x += this.vx;
+		// this.sprite.y += this.vy;
+
+		// bump.hit(this.sprite, gameObjects["block"].sprite, true, false, false,
+		// 	(side, _block) =>
+		// 	{
+		// 		switch (side)
+		// 		{
+		// 			case "left":
+		// 			case "right":
+		// 				this.vx = 0;
+		// 				break;
+		// 			case "top":
+		// 			case "bottom":
+		// 				this.vy = 0;
+		// 				break;
+		// 			default:
+		// 		}
+		// 	}
+		// );
 
 
 	}

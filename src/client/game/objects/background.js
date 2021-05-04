@@ -1,19 +1,22 @@
 class Background extends GameObject
 {
-	constructor ()
+	static name = "background";
+	constructor (x, y, sprite)
 	{
-		super("background");
-		this.sprite = [];
+		super(Background.name, x, y, sprite);
+		// this.sprite = [];
 	}
 
-	onLoad ()
+	static onLoad ()
 	{
-		app.loader.add(`game/sprites/${this.name}.json`);
+		app.loader.add(`game/sprites/background.json`);
 	}
 
-	onCreate ()
+	static create ()
 	{
-		const tileset = app.loader.resources[`game/sprites/${this.name}.json`].textures;
+		gameObjects.background = [];
+
+		const tileset = app.loader.resources[`game/sprites/background.json`].textures;
 
 		const width = viewport.worldWidth / 64;
 		const height = viewport.worldHeight / 64;
@@ -22,7 +25,7 @@ class Background extends GameObject
 		{
 			for (let x = 0; x < width; x++)
 			{
-				const index = this.sprite.length;
+				// const index = this.sprite.length;
 				let bgIndex = 0;
 
 				if (x == 0)
@@ -43,11 +46,14 @@ class Background extends GameObject
 					else if (y == height - 1) bgIndex = 7;
 					else bgIndex = 4;
 				}
-				this.sprite.push(new PIXI.Sprite(tileset[`bg${bgIndex}.png`]));
+				// this.sprite.push(new PIXI.Sprite(tileset[`bg${bgIndex}.png`]));
 
-				this.sprite[index].x = x * 64;
-				this.sprite[index].y = y * 64;
+				// this.sprite[index].x = x * 64;
+				// this.sprite[index].y = y * 64;
 
+				const sprite = new Background(x * 64, y * 64, tileset[`bg${bgIndex}.png`]);
+				// gameObjects.background.push(sprite);
+				GameData.storeObject(sprite, this.name);
 			}
 		}
 	}

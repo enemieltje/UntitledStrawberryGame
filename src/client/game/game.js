@@ -1,8 +1,11 @@
-// const backgroundObjects = [];
-// let strawberry;
 let loading;
-// let ready;
 const gameObjects = {};
+const physicsObjects = {};
+const gameChunks = {};
+const chunksize = {
+	x: 256,
+	y: 256
+};
 
 // sounds
 // deno-lint-ignore no-unused-vars
@@ -11,12 +14,6 @@ let beepBox;
 // vars
 let stateTick = (_delta) => {};
 const bump = new Bump(PIXI);
-
-// keys
-let walkUp;
-let walkDown;
-let walkLeft;
-let walkRight;
 
 const app = new PIXI.Application({
 	width: window.innerWidth,
@@ -63,8 +60,8 @@ function loadingScreen ()
 
 	app.stage.addChild(loading);
 
-	const loaderInstance = new Loader();
-	loaderInstance.load().then(() =>
+	// const loaderInstance = new Loader();
+	Loader.load().then(() =>
 	{
 		console.log("ready!");
 
@@ -75,7 +72,10 @@ function loadingScreen ()
 function onReady ()
 {
 	app.stage.removeChild(loading);
-	app.stage.addChild(gameObjects["ready"].sprite);
+
+	// gameObjects.ready = new Ready();
+	GameData.getObjectFromName("ready").addToParent(app.stage);
+	// app.stage.addChild(gameObjects["ready"].sprite);
 
 	window.addEventListener(
 		"keydown",
@@ -92,21 +92,24 @@ function onStart ()
 
 	app.ticker.add(delta => tick(delta));
 
-	app.stage.removeChild(gameObjects["ready"].sprite);
+	GameData.getObjectFromName("ready").removeFromParent(app.stage);
+	// app.stage.removeChild(gameObjects["ready"].sprite);
 
-	gameObjects["background"].sprite.forEach(object =>
+	GameData.getObjectArrayFromName("background").forEach(object =>
 	{
-		viewport.addChild(object);
+		object.addToParent();
+		// viewport.addChild(object);
 	});
 
-	gameObjects["block"].sprite.forEach(object =>
+	GameData.getObjectArrayFromName("block").forEach(object =>
 	{
-		viewport.addChild(object);
+		object.addToParent();
+		// viewport.addChild(object);
 	});
 
-
-	viewport.addChild(gameObjects["strawberry"].sprite);
-	viewport.follow(gameObjects["strawberry"].sprite, {radius: 192});
+	GameData.getObjectFromName("strawberry").addToParent();
+	// viewport.addChild(gameObjects["strawberry"].sprite);
+	viewport.follow(GameData.getObjectFromName("strawberry").sprite, {radius: 192});
 
 	BeepBox = sounds["game/sounds/BeepBox-Song.mp3"];
 	BeepBox.play();
@@ -117,7 +120,15 @@ function tick (delta)
 	stateTick(delta);
 }
 
-function walkTick (_delta)
+function walkTick (delta)
 {
-	gameObjects["strawberry"].step();
+	GameData.getObjectFromName("strawberry").step(delta);
+	GameData.getObjectArrayFromName("block").forEach((block) =>
+	{
+		block.step(delta);
+	});
+
+
+	// .step(delta);
 }
+
