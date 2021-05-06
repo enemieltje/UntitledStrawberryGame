@@ -7,12 +7,11 @@ class Loader
 	static soundsReady = false;
 	static ready = false;
 
-	constructor ()
-	{
-	}
-
 	static load ()
 	{
+		GameData.setSpriteOffset("jerryIdle.json", 0, -16);
+		GameData.setSpriteOffset("runningJerry.json", 0, -27);
+		// GameData.setSpriteOffset("runningJerry.json", {x: 0, y: 0});
 		return new Promise((resolve) =>
 		{
 			Loader.loadSprites().then(() =>

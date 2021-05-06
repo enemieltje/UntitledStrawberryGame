@@ -21,6 +21,7 @@ class Strawberry extends GameObject
 		// TODO: make collision box
 		super(Strawberry.name, 96, 96, GameData.getSprite(`jerryIdle.json`));
 
+		this.sprite.hitBox.height = 80;
 		this.sprite.animationSpeed = 0.2;
 		this.sprite.anchor.set(0.5);
 		this.applyPhisics = true;
@@ -63,11 +64,11 @@ class Strawberry extends GameObject
 			} else
 			{
 				let validJump = false;
-				const rect = new PIXI.Rectangle(this.sprite.x - this.sprite.width / 2, this.sprite.y + this.sprite.height / 2, this.sprite.width, 1);
+				const rect = new PIXI.Rectangle(this.sprite.hitBox.x, this.sprite.hitBox.y + this.sprite.hitBox.height, this.sprite.hitBox.width, 1);
+
 				GameData.getObjectArrayFromName("block").forEach(block =>
 				{
-					const blockRect = new PIXI.Rectangle(block.sprite.x, block.sprite.y, block.sprite.width, block.sprite.height);
-					if (bump.hitTestRectangle(rect, blockRect))
+					if (bump.hitTestRectangle(rect, block.sprite.hitBox))
 					{
 						validJump = true;
 					}
@@ -127,6 +128,14 @@ class Strawberry extends GameObject
 
 	step (delta)
 	{
+		// viewport.removeChild(this.rect);
+		// this.rect = new PIXI.Graphics();
+		// this.rect.lineStyle(2, 0x00FF00, 1);
+		// this.rect.drawRect(this.sprite.hitBox.x, this.sprite.hitBox.y, this.sprite.hitBox.width, this.sprite.hitBox.height);
+		// this.rect.endFill();
+		// // this.rect.x = this.sprite.x;
+		// // this.rect.y = this.sprite.y;
+		// viewport.addChild(this.rect);
 
 		this.debugScreen.text =
 			`a: ${Math.round(this.sprite.ax * 100) / 100}, ${Math.round(this.sprite.ay * 100) / 100}\n
@@ -196,7 +205,8 @@ class Strawberry extends GameObject
 
 			let isFloating = true;
 
-			const hitBox = new PIXI.Rectangle(Math.round(this.absX()), Math.round(this.absY() + this.sprite.height), this.sprite.width, 1);
+			// const hitBox = new PIXI.Rectangle(Math.round(this.absX()), Math.round(this.absY() + this.sprite.height), this.sprite.width, 1);
+			const hitBox = new PIXI.Rectangle(Math.round(this.sprite.hitBox.x), Math.round(this.sprite.hitBox.y + this.sprite.hitBox.height), this.sprite.hitBox.width, 1);
 			// viewport.removeChild(this.rect);
 			// this.rect = new PIXI.Graphics();
 			// this.rect.beginFill(0x00FF00);
@@ -210,8 +220,8 @@ class Strawberry extends GameObject
 			collisionCandidates.forEach(object =>
 			{
 				// console.log(`${object.x}, ${object.y}, ${object.width}, ${object.height}`);
-				const blockRect = new PIXI.Rectangle(object.x, object.y, object.width, object.height);
-				if (bump.hitTestRectangle(hitBox, blockRect))
+				// const blockRect = new PIXI.Rectangle(object.x, object.y, object.width, object.height);
+				if (bump.hitTestRectangle(hitBox, object.hitBox))
 				{
 					// console.log("hit!");
 					isFloating = false;

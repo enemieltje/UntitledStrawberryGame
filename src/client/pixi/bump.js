@@ -573,59 +573,61 @@ class Bump
 		if (!r1._bumpPropertiesAdded) this.addCollisionProperties(r1);
 		if (!r2._bumpPropertiesAdded) this.addCollisionProperties(r2);
 
-		let collision, combinedHalfWidths, combinedHalfHeights,
-			overlapX, overlapY, vx, vy;
+		let collision = {};
+		// combinedHalfWidths, combinedHalfHeights,
+		// 	overlapX, overlapY, vx, vy;
 
 		//Calculate the distance vector
 		if (global)
 		{
-			vx = (r1.gx + Math.abs(r1.halfWidth) - r1.xAnchorOffset) - (r2.gx + Math.abs(r2.halfWidth) - r2.xAnchorOffset);
-			vy = (r1.gy + Math.abs(r1.halfHeight) - r1.yAnchorOffset) - (r2.gy + Math.abs(r2.halfHeight) - r2.yAnchorOffset);
+			collision.vx = (r1.gx + Math.abs(r1.halfWidth) - r1.xAnchorOffset) - (r2.gx + Math.abs(r2.halfWidth) - r2.xAnchorOffset);
+			collision.vy = (r1.gy + Math.abs(r1.halfHeight) - r1.yAnchorOffset) - (r2.gy + Math.abs(r2.halfHeight) - r2.yAnchorOffset);
 		} else
 		{
 			//vx = r1.centerX - r2.centerX;
 			//vy = r1.centerY - r2.centerY;
-			vx = (r1.x + Math.abs(r1.halfWidth) - r1.xAnchorOffset) - (r2.x + Math.abs(r2.halfWidth) - r2.xAnchorOffset);
-			vy = (r1.y + Math.abs(r1.halfHeight) - r1.yAnchorOffset) - (r2.y + Math.abs(r2.halfHeight) - r2.yAnchorOffset);
+			collision.vx = (r1.x + Math.abs(r1.halfWidth) - r1.xAnchorOffset) - (r2.x + Math.abs(r2.halfWidth) - r2.xAnchorOffset);
+			collision.vy = (r1.y + Math.abs(r1.halfHeight) - r1.yAnchorOffset) - (r2.y + Math.abs(r2.halfHeight) - r2.yAnchorOffset);
 		}
 
 		//Figure out the combined half-widths and half-heights
-		combinedHalfWidths = Math.abs(r1.halfWidth) + Math.abs(r2.halfWidth);
-		combinedHalfHeights = Math.abs(r1.halfHeight) + Math.abs(r2.halfHeight);
+		collision.combinedHalfWidths = Math.abs(r1.halfWidth) + Math.abs(r2.halfWidth);
+		collision.combinedHalfHeights = Math.abs(r1.halfHeight) + Math.abs(r2.halfHeight);
 
 		//Check whether vx is less than the combined half widths
-		if (Math.abs(vx) < combinedHalfWidths)
+		if (Math.abs(collision.vx) < collision.combinedHalfWidths)
 		{
 
 			//A collision might be occurring!
 			//Check whether vy is less than the combined half heights
-			if (Math.abs(vy) < combinedHalfHeights)
+			if (Math.abs(collision.vy) < collision.combinedHalfHeights)
 			{
 
 				//A collision has occurred! This is good!
 				//Find out the size of the overlap on both the X and Y axes
-				overlapX = combinedHalfWidths - Math.abs(vx);
-				overlapY = combinedHalfHeights - Math.abs(vy);
+				collision.overlapX = collision.combinedHalfWidths - Math.abs(collision.vx);
+				collision.overlapY = collision.combinedHalfHeights - Math.abs(collision.vy);
 
 				//The collision has occurred on the axis with the
 				//*smallest* amount of overlap. Let's figure out which
 				//axis that is
 
-				if (overlapX >= overlapY)
+				if (collision.overlapX >= collision.overlapY)
 				{
 					//The collision is happening on the X axis
 					//But on which side? vy can tell us
+					collision.axis = "vy";
 
-					if (vy > 0)
+					if (collision.vy > 0)
 					{
-						collision = "top";
+						collision.side = "top";
 						//Move the rectangle out of the collision
-						r1.y = r1.y + overlapY;
+						// r1.y = r1.y + collision.overlapY;
 					} else
 					{
-						collision = "bottom";
+						collision.side = "bottom";
 						//Move the rectangle out of the collision
-						r1.y = r1.y - overlapY;
+						// r1.y = r1.y - collision.overlapY;
 					}
 
 					//Bounce
@@ -647,17 +649,17 @@ class Bump
 				{
 					//The collision is happening on the Y axis
 					//But on which side? vx can tell us
-
-					if (vx > 0)
+					collision.axis = "vx";
+					if (collision.vx > 0)
 					{
-						collision = "left";
+						collision.side = "left";
 						//Move the rectangle out of the collision
-						r1.x = r1.x + overlapX;
+						// r1.x = r1.x + collision.overlapX;
 					} else
 					{
-						collision = "right";
+						collision.side = "right";
 						//Move the rectangle out of the collision
-						r1.x = r1.x - overlapX;
+						// r1.x = r1.x - collision.overlapX;
 					}
 
 					//Bounce

@@ -6,7 +6,7 @@ class GameData
 	static gameChunks = {};
 
 	static gameSprites = {};
-	static nameSpriteMap = {};
+	static spriteOffsets = {};
 
 	static idGeneratorId = 0;
 
@@ -69,13 +69,24 @@ class GameData
 
 	static getSprite (name)
 	{
-		// if (!this.gameSprites[`game/sprites/${name}`])
-		// {
-		// 	console.log(`${name} is not in gameSprites`);
-		// 	return;
-		// }
-		// console.log(`returned ${name}`);
 		return this.gameSprites[`game/sprites/${name}`];
+	}
+
+	static getSpriteOffset (name)
+	{
+		const offset = this.spriteOffsets[name];
+		if (offset)
+		{
+			return offset;
+		} else
+		{
+			return {x: 0, y: 0};
+		}
+	}
+
+	static setSpriteOffset (name, x, y)
+	{
+		this.spriteOffsets[name] = {x: x, y: y};
 	}
 
 	static onCreate ()
