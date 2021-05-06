@@ -5,6 +5,9 @@ class GameData
 
 	static gameChunks = {};
 
+	static gameSprites = {};
+	static nameSpriteMap = {};
+
 	static idGeneratorId = 0;
 
 	static genId ()
@@ -62,5 +65,36 @@ class GameData
 	static getObjectsInChunk (coord)
 	{
 		return this.gameChunks[coord.str()];
+	}
+
+	static getSprite (name)
+	{
+		// if (!this.gameSprites[`game/sprites/${name}`])
+		// {
+		// 	console.log(`${name} is not in gameSprites`);
+		// 	return;
+		// }
+		// console.log(`returned ${name}`);
+		return this.gameSprites[`game/sprites/${name}`];
+	}
+
+	static onCreate ()
+	{
+		Object.keys(app.loader.resources).forEach(spritePath =>
+		{
+			const type = spritePath.split(".")[1];
+			if (type == "json")
+			{
+				this.gameSprites[spritePath] = [];
+				const tilesetObject = app.loader.resources[spritePath].textures;
+
+				Object.keys(tilesetObject).forEach(image =>
+				{
+					this.gameSprites[spritePath].push(tilesetObject[image]);
+				});
+			}
+			else
+				this.gameSprites[spritePath] = [app.loader.resources[spritePath].texture];
+		});
 	}
 }

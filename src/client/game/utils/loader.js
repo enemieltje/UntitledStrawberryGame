@@ -84,6 +84,7 @@ class Loader
 	{
 		console.log("Creating Sprites");
 
+		GameData.onCreate();
 		Loader.objectTypes.forEach(object =>
 		{
 			object.create();

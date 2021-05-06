@@ -8,7 +8,7 @@ class Ready extends GameObject
 
 	static onLoad ()
 	{
-		super.onLoad([this.name]);
+		super.onLoad([`${this.name}.png`]);
 	}
 
 	static create ()

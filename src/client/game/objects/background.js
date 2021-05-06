@@ -3,20 +3,17 @@ class Background extends GameObject
 	static name = "background";
 	constructor (x, y, sprite)
 	{
-		super(Background.name, x, y, sprite);
-		// this.sprite = [];
+		super(Background.name, x, y, [sprite]);
 	}
 
 	static onLoad ()
 	{
-		app.loader.add(`game/sprites/background.json`);
+		super.onLoad(["background.json"]);
 	}
 
 	static create ()
 	{
 		gameObjects.background = [];
-
-		const tileset = app.loader.resources[`game/sprites/background.json`].textures;
 
 		const width = viewport.worldWidth / 64;
 		const height = viewport.worldHeight / 64;
@@ -46,7 +43,7 @@ class Background extends GameObject
 					else bgIndex = 4;
 				}
 
-				const sprite = new Background(x * 64, y * 64, tileset[`bg${bgIndex}.png`]);
+				const sprite = new Background(x * 64, y * 64, GameData.getSprite(`background.json`)[bgIndex]);
 				GameData.storeObject(sprite, this.name);
 			}
 		}

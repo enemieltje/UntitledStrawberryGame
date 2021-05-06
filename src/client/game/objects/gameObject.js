@@ -5,19 +5,22 @@ class GameObject
 	sounds = [];
 	name;
 	id;
-	images = {};
+	currentImageName;
+	#imageObject = {};
 
 	#applyPhisics = false;
 
 	chunks = [];
 	collisionChunks = [];
 
-	constructor (name, initialX = 64, initialY = 64, texture, createSprite)
+	constructor (name, initialX = 64, initialY = 64, textures)
 	{
-		texture ? "" : texture = app.loader.resources[`game/sprites/${name}.png`].texture;
+		// textures ? "" : textures = [app.loader.resources[`game/sprites/${name}.png`].texture];
+		textures ? "" : textures = GameData.getSprite(`${name}.png`);
 		this.name = name;
 
-		createSprite ? this.sprite = createSprite() : this.sprite = new PIXI.Sprite(texture);
+		this.sprite = new PIXI.AnimatedSprite(textures);
+		this.sprite.play();
 
 		this.sprite.properties = {
 			absorbtion: 1,
@@ -25,8 +28,6 @@ class GameObject
 			drag: 0,
 			mass: 1
 		};
-
-		// this.sprite.mass = 1;
 
 		this.sprite.ax = 0;
 		this.sprite.ay = 0;
@@ -53,13 +54,14 @@ class GameObject
 		sprites.forEach((sprite) =>
 		{
 			console.log(`loading sprite: ${sprite}`);
-			app.loader.add(`game/sprites/${sprite}.png`);
+			app.loader.add(`game/sprites/${sprite}`);
+			// GameData.addSpriteName(sprite)
 		});
 	}
 
 	static create ()
 	{
-
+		// const tileset = app.loader.resources[`game/sprites/background.json`].textures;
 	}
 
 	set applyPhysics (applyPhysics)
@@ -232,9 +234,25 @@ class GameObject
 		});
 	}
 
-	setImage (imageName)
+	set image (imageName)
 	{
+		if (this.currentImageName != imageName)
+		{
+			const image = GameData.getSprite(imageName);
+			if (!image)
+			{
+				console.log(`${imageName} is not a valid image`);
+				return;
+			}
+			this.sprite.textures = image;
+			this.sprite.play();
+			this.currentImageName = imageName;
+		}
+	}
 
+	get image ()
+	{
+		return this.currentImageName;
 	}
 
 	absX ()

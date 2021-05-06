@@ -13,25 +13,16 @@ class Strawberry extends GameObject
 	gravity = 0.5;
 	// texture = "running";
 
-	disableGravity = true;
+	disableGravity = false;
 	rect = {};
 	debugScreen;
 	constructor ()
 	{
 		// TODO: make collision box
-		super(Strawberry.name, 96, 96, false, () =>
-		{
-			// const tileset = app.loader.resources[`game/sprites/runningJerry.json`].textures;
-
-
-			return new PIXI.AnimatedSprite(Strawberry.tileset);
-		});
+		super(Strawberry.name, 96, 96, GameData.getSprite(`jerryIdle.json`));
 
 		this.sprite.animationSpeed = 0.2;
-		this.sprite.play();
 		this.sprite.anchor.set(0.5);
-		// if (!this.disableGravity)
-		// this.sprite.ay = gravity;
 		this.applyPhisics = true;
 		this.sprite.properties.absorbtion = 100;
 		this.sprite.properties.static = false;
@@ -54,18 +45,11 @@ class Strawberry extends GameObject
 
 	static onLoad ()
 	{
-		super.onLoad([this.name]);
-		app.loader.add(`game/sprites/runningJerry.json`);
+		super.onLoad(["runningJerry.json", "jerryIdle.json"]);
 	}
 
 	static create ()
 	{
-
-		const tilesetObject = app.loader.resources[`game/sprites/runningJerry.json`].textures;
-		Object.keys(tilesetObject).forEach(image =>
-		{
-			Strawberry.tileset.push(tilesetObject[image]);
-		});
 		GameData.storeObject(new Strawberry(), this.name);
 	}
 
@@ -151,39 +135,28 @@ class Strawberry extends GameObject
 
 		super.step(delta);
 
-		const sign = Math.sign(this.sprite.vx);
-		// if (sign == 0)
-		// {
-		// 	if (this.texture != "idle")
-		// 	{
-		// 		this.sprite.textures = [app.loader.resources[`game/sprites/${this.name}.png`].texture];
-		// 		this.texture = "idle";
-		// 	}
-
-		// } else
+		let sign = Math.sign(this.sprite.vx);
+		sign == 0 ? sign = 1 : "";
 
 		if (this.sprite.vx * sign < 0.5)
 		{
-			const stopFrame = 0;
-			if (this.texture != "idle" && this.sprite.currentFrame == stopFrame)
-			{
-				this.sprite.textures = [Strawberry.tileset[stopFrame]];
-				this.texture = "idle";
-			}
+			// if (this.currentImageName != "idle" && this.sprite.currentFrame == 0)
+			// {
+			// 	this.sprite.stop();
+
+			// 	this.currentImageName = "idle";
+			// }
+			this.image = "jerryIdle.json";
 		} else
 		{
-			if (this.texture != "running")
-			{
-				// const imageArray = [];
-				// Object.keys(Strawberry.tileset).forEach(image =>
-				// {
-				// 	imageArray.push(Strawberry.tileset[image]);
-				// });
-
-				this.sprite.textures = Strawberry.tileset;
-				this.sprite.play();
-				this.texture = "running";
-			}
+			this.image = "runningJerry.json";
+			// if (this.texture != "running")
+			// {
+			// 	// const image = GameData.getSprite(imageName);
+			// 	this.sprite.textures = Strawberry.tileset;
+			// 	this.sprite.play();
+			// 	this.texture = "running";
+			// }
 		}
 		this.sprite.scale.x = sign;
 
@@ -224,14 +197,14 @@ class Strawberry extends GameObject
 			let isFloating = true;
 
 			const hitBox = new PIXI.Rectangle(Math.round(this.absX()), Math.round(this.absY() + this.sprite.height), this.sprite.width, 1);
-			viewport.removeChild(this.rect);
-			this.rect = new PIXI.Graphics();
-			this.rect.beginFill(0x00FF00);
-			this.rect.drawRect(0, 0, this.sprite.width, 1);
-			this.rect.endFill();
-			this.rect.x = Math.round(this.absX());
-			this.rect.y = Math.round(this.absY() + this.sprite.height);
-			viewport.addChild(this.rect);
+			// viewport.removeChild(this.rect);
+			// this.rect = new PIXI.Graphics();
+			// this.rect.beginFill(0x00FF00);
+			// this.rect.drawRect(0, 0, this.sprite.width, 1);
+			// this.rect.endFill();
+			// this.rect.x = Math.round(this.absX());
+			// this.rect.y = Math.round(this.absY() + this.sprite.height);
+			// viewport.addChild(this.rect);
 			// console.log(collisionCandidates.length);
 
 			collisionCandidates.forEach(object =>
