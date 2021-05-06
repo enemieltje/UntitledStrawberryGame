@@ -14,7 +14,6 @@ class Ready extends GameObject
 	static create ()
 	{
 		GameData.storeObject(new Ready(), this.name);
-		// gameObjects.ready = new Ready();
 	}
 
 	onCreate ()

@@ -6,7 +6,9 @@ class Block extends GameObject
 	{
 		super(Block.name, x, y);
 		this.applyPhisics = true;
-		this.sprite.mass = 10000000;
+		// this.sprite.properties.mass = Math.pow(10, 100);
+		// this.sprite.properties.mass = 0.001;
+		// this.sprite.properties.static = false;
 		// this.sprite = [];
 	}
 
@@ -18,8 +20,6 @@ class Block extends GameObject
 	static create ()
 	{
 		gameObjects.block = [];
-		// super.onCreate();
-		// this.applyPhisics = true;
 
 		const coords = [];
 		for (let i = 0; i < 10; i++)
@@ -40,7 +40,6 @@ class Block extends GameObject
 		coords.forEach(coord =>
 		{
 			GameData.storeObject(new Block(coord[0] * 64, coord[1] * 64), this.name);
-			// gameObjects.block.push(new Block(coord[0] * 64, coord[1] * 64));
 		});
 	}
 }

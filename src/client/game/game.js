@@ -8,7 +8,6 @@ const chunksize = {
 };
 
 // sounds
-// deno-lint-ignore no-unused-vars
 let beepBox;
 
 // vars
@@ -40,7 +39,6 @@ viewport
 
 loadLoadingScreen();
 
-
 function loadLoadingScreen ()
 {
 	app.loader
@@ -60,22 +58,15 @@ function loadingScreen ()
 
 	app.stage.addChild(loading);
 
-	// const loaderInstance = new Loader();
-	Loader.load().then(() =>
-	{
-		console.log("ready!");
-
-		onReady();
-	});
+	Loader.load().then(onReady);
 }
 
 function onReady ()
 {
+	console.log("ready!");
 	app.stage.removeChild(loading);
 
-	// gameObjects.ready = new Ready();
 	GameData.getObjectFromName("ready").addToParent(app.stage);
-	// app.stage.addChild(gameObjects["ready"].sprite);
 
 	window.addEventListener(
 		"keydown",
@@ -93,22 +84,18 @@ function onStart ()
 	app.ticker.add(delta => tick(delta));
 
 	GameData.getObjectFromName("ready").removeFromParent(app.stage);
-	// app.stage.removeChild(gameObjects["ready"].sprite);
 
 	GameData.getObjectArrayFromName("background").forEach(object =>
 	{
 		object.addToParent();
-		// viewport.addChild(object);
 	});
 
 	GameData.getObjectArrayFromName("block").forEach(object =>
 	{
 		object.addToParent();
-		// viewport.addChild(object);
 	});
 
 	GameData.getObjectFromName("strawberry").addToParent();
-	// viewport.addChild(gameObjects["strawberry"].sprite);
 	viewport.follow(GameData.getObjectFromName("strawberry").sprite, {radius: 192});
 
 	BeepBox = sounds["game/sounds/BeepBox-Song.mp3"];
@@ -127,8 +114,5 @@ function walkTick (delta)
 	{
 		block.step(delta);
 	});
-
-
-	// .step(delta);
 }
 

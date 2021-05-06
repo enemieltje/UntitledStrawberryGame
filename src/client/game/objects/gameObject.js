@@ -5,19 +5,28 @@ class GameObject
 	sounds = [];
 	name;
 	id;
+	images = {};
 
 	#applyPhisics = false;
 
 	chunks = [];
+	collisionChunks = [];
 
-
-	constructor (name, initialX = 64, initialY = 64, sprite)
+	constructor (name, initialX = 64, initialY = 64, texture, createSprite)
 	{
-		sprite ? "" : sprite = app.loader.resources[`game/sprites/${name}.png`].texture;
+		texture ? "" : texture = app.loader.resources[`game/sprites/${name}.png`].texture;
 		this.name = name;
-		this.sprite = new PIXI.Sprite(sprite);
 
-		this.sprite.mass = 1;
+		createSprite ? this.sprite = createSprite() : this.sprite = new PIXI.Sprite(texture);
+
+		this.sprite.properties = {
+			absorbtion: 1,
+			static: true,
+			drag: 0,
+			mass: 1
+		};
+
+		// this.sprite.mass = 1;
 
 		this.sprite.ax = 0;
 		this.sprite.ay = 0;
@@ -27,7 +36,6 @@ class GameObject
 
 		this.sprite.x = initialX;
 		this.sprite.y = initialY;
-		// this.id = genId();
 	}
 
 	addToParent (parent = viewport)
@@ -54,11 +62,6 @@ class GameObject
 
 	}
 
-	// onCreate (name = this.name)
-	// {
-	// 	this.sprite = new PIXI.Sprite(app.loader.resources[`game/sprites/${name}.png`].texture);
-	// }
-
 	set applyPhysics (applyPhysics)
 	{
 		this.#applyPhisics = applyPhysics;
@@ -82,6 +85,12 @@ class GameObject
 
 	move (delta)
 	{
+		if (this.sprite.properties.static) return;
+		// console.log(`drag: ${this.sprite.properties.drag}, vx: ${this.sprite.vx}` +
+		// 	`drag X: ${this.sprite.properties.drag * this.sprite.vx * delta}`);
+		this.sprite.vx -= this.sprite.properties.drag * this.sprite.vx * delta;
+		this.sprite.vy -= this.sprite.properties.drag * this.sprite.vy * delta;
+
 		this.sprite.vx += this.sprite.ax * delta;
 		this.sprite.vy += this.sprite.ay * delta;
 
@@ -97,9 +106,9 @@ class GameObject
 		{
 			const xCoords = new Set();
 			const yCoords = new Set();
-			xCoords.add(Math.floor((this.absX()) / chunksize.x));
+			xCoords.add(Math.floor(this.absX() / chunksize.x));
 			xCoords.add(Math.floor((this.absX() + this.sprite.width) / chunksize.x));
-			yCoords.add(Math.floor((this.absY()) / chunksize.y));
+			yCoords.add(Math.floor(this.absY() / chunksize.y));
 			yCoords.add(Math.floor((this.absY() + this.sprite.height) / chunksize.y));
 
 			xCoords.forEach((x) =>
@@ -116,17 +125,23 @@ class GameObject
 			this.chunks.forEach((chunk) =>
 			{
 				GameData.removeObjectFromChunk(this.id, chunk);
-				// delete gameChunks[chunk.str()][this.id];
 			});
 			newChunks.forEach((newChunk) =>
 			{
 				GameData.putObjectInChunk(this.id, newChunk);
-				// const chunk = gameChunks[newChunk.str()];
-				// chunk ? chunk.add(this.id) : gameChunks[newChunk.str()] = new Set([this.id]);
 			});
 		}
 
 		this.chunks = newChunks;
+		this.collisionChunks = [];
+
+		const cX = Math.round(this.absX() / chunksize.x);
+		const cY = Math.round(this.absY() / chunksize.y);
+
+		this.collisionChunks.push(new Coord(cX, cY));
+		this.collisionChunks.push(new Coord(cX - 1, cY));
+		this.collisionChunks.push(new Coord(cX, cY - 1));
+		this.collisionChunks.push(new Coord(cX - 1, cY - 1));
 
 		this.vis.forEach((rect) =>
 		{
@@ -135,25 +150,26 @@ class GameObject
 
 		this.vis = [];
 
-		this.chunks.forEach((chunk) =>
-		{
-			const rect = new PIXI.Graphics();
-			rect.lineStyle(4, 0xFF3300, 1);
-			// rect.beginFill(0x66CCFF);
-			rect.drawRect(0, 0, chunksize.x, chunksize.y);
-			rect.endFill();
-			rect.x = chunk.x * chunksize.x;
-			rect.y = chunk.y * chunksize.y;
-			this.vis.push(rect);
-			viewport.addChild(rect);
-		});
+
+		// this.chunks.forEach((chunk) =>
+		// {
+		// 	const rect = new PIXI.Graphics();
+		// 	rect.lineStyle(4, 0xFF3300, 1);
+		// 	rect.drawRect(0, 0, chunksize.x, chunksize.y);
+		// 	rect.endFill();
+		// 	rect.x = chunk.x * chunksize.x;
+		// 	rect.y = chunk.y * chunksize.y;
+		// 	this.vis.push(rect);
+		// 	viewport.addChild(rect);
+		// });
+
 	}
 
 	fixCollision ()
 	{
 		const collisionCandidates = new Set();
 
-		this.chunks.forEach((chunkId) =>
+		this.collisionChunks.forEach((chunkId) =>
 		{
 			const objects = GameData.getObjectsInChunk(chunkId);
 
@@ -177,40 +193,48 @@ class GameObject
 		});
 		bump.hit(this.sprite, candidateArray, true, false, false, (side, otherObject) =>
 		{
-
-			let v1 = 0;
-			let v2 = 0;
-			const m1 = this.sprite.mass;
-			const m2 = otherObject.mass;
+			if (otherObject.properties.static && this.sprite.properties.static) return;
+			let axis;
 
 			switch (side)
 			{
 				case "left":
 				case "right":
-					v1 = this.sprite.vx;
-					v2 = otherObject.vx;
-					otherObject.vx = (2 * m1) / (m1 + m2) * v1 - ((m1 - m2) / (m1 + m2)) * v2;
-					// otherObject.vx = ((m1 - m2) / (m1 + m2)) * v2 + (2 * m1) / (m1 + m2) * v1;
-
-					this.sprite.vx = ((m1 - m2) / (m1 + m2)) * v1 + (2 * m1) / (m1 + m2) * v2;
-
-					// this.sprite.vx *= -1;
-					// otherObject.vx *= -1;
+					axis = "vx";
 					break;
 				case "top":
 				case "bottom":
-					v1 = this.sprite.vy;
-					v2 = otherObject.vy;
-					otherObject.vy = (2 * m1) / (m1 + m2) * v1 - ((m1 - m2) / (m1 + m2)) * v2;
-
-					console.log(`old vy: ${this.sprite.vy}`);
-					this.sprite.vy = ((m1 - m2) / (m1 + m2)) * v1 + (2 * m1) / (m1 + m2) * v2;
-					console.log(`new vy: ${this.sprite.vy}`);
-					// this.sprite.vy *= -1;
-					// otherObject.vy *= -1;
+					axis = "vy";
 					break;
 			}
+			const v1 = this.sprite[axis];
+			const v2 = otherObject[axis];
+			const m1 = this.sprite.properties.mass;
+			const m2 = otherObject.properties.mass;
+			const absorbtion = otherObject.properties.absorbtion * this.sprite.properties.absorbtion;
+
+			if (otherObject.properties.static)
+			{
+				this.sprite[axis] *= -1;
+				this.sprite[axis] /= absorbtion;
+			} else if (this.sprite.properties.static)
+			{
+				otherObject[axis] *= -1;
+				otherObject[axis] /= absorbtion;
+			} else
+			{
+				otherObject[axis] = (2 * m1) / (m1 + m2) * v1 - ((m1 - m2) / (m1 + m2)) * v2;
+				otherObject[axis] /= absorbtion;
+
+				this.sprite[axis] = ((m1 - m2) / (m1 + m2)) * v1 + (2 * m1) / (m1 + m2) * v2;
+				this.sprite[axis] /= absorbtion;
+			}
 		});
+	}
+
+	setImage (imageName)
+	{
+
 	}
 
 	absX ()

@@ -32,17 +32,13 @@ class GameData
 	{
 		if (!this.nameIdMap[name]) console.log(`tried to get object ${name} that does not exist`);
 
-		// if (!this.nameIdMap[name].length == 1)
-		// 	return this.getObjectFromId(this.nameIdMap[name][0]);
-
-		// if (!index)
-		// 	return this.getObjectFromId(this.nameIdMap[name]);
 		return this.getObjectFromId(this.nameIdMap[name][index]);
 	}
 
 	static getObjectArrayFromName (name)
 	{
 		if (!this.nameIdMap[name]) console.log(`tried to get object ${name} that does not exist`);
+
 		const objectArray = [];
 		this.nameIdMap[name].forEach((id) =>
 		{

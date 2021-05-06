@@ -25,7 +25,6 @@ class Background extends GameObject
 		{
 			for (let x = 0; x < width; x++)
 			{
-				// const index = this.sprite.length;
 				let bgIndex = 0;
 
 				if (x == 0)
@@ -46,13 +45,8 @@ class Background extends GameObject
 					else if (y == height - 1) bgIndex = 7;
 					else bgIndex = 4;
 				}
-				// this.sprite.push(new PIXI.Sprite(tileset[`bg${bgIndex}.png`]));
-
-				// this.sprite[index].x = x * 64;
-				// this.sprite[index].y = y * 64;
 
 				const sprite = new Background(x * 64, y * 64, tileset[`bg${bgIndex}.png`]);
-				// gameObjects.background.push(sprite);
 				GameData.storeObject(sprite, this.name);
 			}
 		}

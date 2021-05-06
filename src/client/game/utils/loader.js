@@ -99,8 +99,5 @@ class Loader
 		if (!Loader.spritesReady || !Loader.soundsReady) return;
 
 		Loader.ready = true;
-
 	}
-
-
 }
