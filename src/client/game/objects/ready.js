@@ -3,7 +3,7 @@ class Ready extends GameObject
 	static name = "ready";
 	constructor ()
 	{
-		super(Ready.name, 32, 96);
+		super(Ready.name, {x: 32, y: 96});
 	}
 
 	static onLoad ()

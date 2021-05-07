@@ -4,7 +4,8 @@ class Planet extends GameObject
 
 	constructor ()
 	{
-		super(Planet.name, 1024, 1024, false, new PIXI.Circle(0, 0, 256));
+		// super(Planet.name, {x: 1024, y: 1024, height: 128, width: 128});
+		super(Planet.name, {x: 1024, y: 1024, radius: 32});
 		this.applyPhisics = true;
 	}
 

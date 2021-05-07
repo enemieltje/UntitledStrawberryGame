@@ -4,7 +4,7 @@ class Block extends GameObject
 
 	constructor (x, y)
 	{
-		super(Block.name, x, y);
+		super(Block.name, {x: x, y: y, height: 64, width: 64});
 		this.applyPhisics = true;
 		// this.sprite.properties.mass = Math.pow(10, 100);
 		// this.sprite.properties.mass = 0.001;

@@ -20,154 +20,235 @@ class Bump
 		//Add properties to Pixi sprites
 		if (this.renderer === "pixi")
 		{
-
-			//gx
-			if (sprite.gx === undefined)
+			if (sprite.radius)
 			{
-				Object.defineProperty(sprite, "gx", {
-					get () {return sprite.getGlobalPosition().x;},
-					enumerable: true, configurable: true
-				});
-			}
+				//gx
+				if (sprite.gx === undefined)
+				{
+					Object.defineProperty(sprite, "gx", {
+						get () {return sprite.x;},
+						enumerable: true, configurable: true
+					});
+				}
 
-			//gy
-			if (sprite.gy === undefined)
-			{
-				Object.defineProperty(sprite, "gy", {
-					get () {return sprite.getGlobalPosition().y;},
-					enumerable: true, configurable: true
-				});
-			}
+				//gy
+				if (sprite.gy === undefined)
+				{
+					Object.defineProperty(sprite, "gy", {
+						get () {return sprite.y;},
+						enumerable: true, configurable: true
+					});
+				}
 
-			//centerX
-			if (sprite.centerX === undefined)
-			{
-				Object.defineProperty(sprite, "centerX", {
-					get () {return sprite.x + sprite.width / 2;},
-					enumerable: true, configurable: true
-				});
-			}
+				//centerX
+				if (sprite.centerX === undefined)
+				{
+					Object.defineProperty(sprite, "centerX", {
+						get () {return sprite.x;},
+						enumerable: true, configurable: true
+					});
+				}
 
-			//centerY
-			if (sprite.centerY === undefined)
-			{
-				Object.defineProperty(sprite, "centerY", {
-					get () {return sprite.y + sprite.height / 2;},
-					enumerable: true, configurable: true
-				});
-			}
+				//centerY
+				if (sprite.centerY === undefined)
+				{
+					Object.defineProperty(sprite, "centerY", {
+						get () {return sprite.y;},
+						enumerable: true, configurable: true
+					});
+				}
 
-			//halfWidth
-			if (sprite.halfWidth === undefined)
-			{
-				Object.defineProperty(sprite, "halfWidth", {
-					get () {return sprite.width / 2;},
-					enumerable: true, configurable: true
-				});
-			}
+				//halfWidth
+				if (sprite.halfWidth === undefined)
+				{
+					Object.defineProperty(sprite, "halfWidth", {
+						get () {return sprite.radius;},
+						enumerable: true, configurable: true
+					});
+				}
 
-			//halfHeight
-			if (sprite.halfHeight === undefined)
-			{
-				Object.defineProperty(sprite, "halfHeight", {
-					get () {return sprite.height / 2;},
-					enumerable: true, configurable: true
-				});
-			}
+				//halfHeight
+				if (sprite.halfHeight === undefined)
+				{
+					Object.defineProperty(sprite, "halfHeight", {
+						get () {return sprite.radius;},
+						enumerable: true, configurable: true
+					});
+				}
 
-			//xAnchorOffset
-			if (sprite.xAnchorOffset === undefined)
-			{
-				Object.defineProperty(sprite, "xAnchorOffset", {
-					get ()
-					{
-						if (sprite.anchor !== undefined)
-						{
-							return sprite.width * sprite.anchor.x;
-						} else
+				//xAnchorOffset
+				if (sprite.xAnchorOffset === undefined)
+				{
+					Object.defineProperty(sprite, "xAnchorOffset", {
+						get ()
 						{
 							return 0;
-						}
-					},
-					enumerable: true, configurable: true
-				});
-			}
+						},
+						enumerable: true, configurable: true
+					});
+				}
 
-			//yAnchorOffset
-			if (sprite.yAnchorOffset === undefined)
-			{
-				Object.defineProperty(sprite, "yAnchorOffset", {
-					get ()
-					{
-						if (sprite.anchor !== undefined)
-						{
-							return sprite.height * sprite.anchor.y;
-						} else
+				//yAnchorOffset
+				if (sprite.yAnchorOffset === undefined)
+				{
+					Object.defineProperty(sprite, "yAnchorOffset", {
+						get ()
 						{
 							return 0;
-						}
+						},
+						enumerable: true, configurable: true
+					});
+				}
+			} else
+			{
+				//gx
+				if (sprite.gx === undefined)
+				{
+					Object.defineProperty(sprite, "gx", {
+						get () {return sprite.x;},
+						enumerable: true, configurable: true
+					});
+				}
+
+				//gy
+				if (sprite.gy === undefined)
+				{
+					Object.defineProperty(sprite, "gy", {
+						get () {return sprite.y;},
+						enumerable: true, configurable: true
+					});
+				}
+
+				//centerX
+				if (sprite.centerX === undefined)
+				{
+					Object.defineProperty(sprite, "centerX", {
+						get () {return sprite.x + sprite.width / 2;},
+						enumerable: true, configurable: true
+					});
+				}
+
+				//centerY
+				if (sprite.centerY === undefined)
+				{
+					Object.defineProperty(sprite, "centerY", {
+						get () {return sprite.y + sprite.height / 2;},
+						enumerable: true, configurable: true
+					});
+				}
+
+				//halfWidth
+				if (sprite.halfWidth === undefined)
+				{
+					Object.defineProperty(sprite, "halfWidth", {
+						get () {return sprite.width / 2;},
+						enumerable: true, configurable: true
+					});
+				}
+
+				//halfHeight
+				if (sprite.halfHeight === undefined)
+				{
+					Object.defineProperty(sprite, "halfHeight", {
+						get () {return sprite.height / 2;},
+						enumerable: true, configurable: true
+					});
+				}
+
+				//xAnchorOffset
+				if (sprite.xAnchorOffset === undefined)
+				{
+					Object.defineProperty(sprite, "xAnchorOffset", {
+						get ()
+						{
+							if (sprite.anchor !== undefined)
+							{
+								return sprite.width * sprite.anchor.x;
+							} else
+							{
+								return 0;
+							}
+						},
+						enumerable: true, configurable: true
+					});
+				}
+
+				//yAnchorOffset
+				if (sprite.yAnchorOffset === undefined)
+				{
+					Object.defineProperty(sprite, "yAnchorOffset", {
+						get ()
+						{
+							if (sprite.anchor !== undefined)
+							{
+								return sprite.height * sprite.anchor.y;
+							} else
+							{
+								return 0;
+							}
+						},
+						enumerable: true, configurable: true
+					});
+				}
+
+				if (sprite.circular && sprite.radius === undefined)
+				{
+					Object.defineProperty(sprite, "radius", {
+						get () {return sprite.width / 2;},
+						enumerable: true, configurable: true
+					});
+				}
+
+				//Earlier code - not needed now.
+				/*
+				Object.defineProperties(sprite, {
+				  "gx": {
+					get(){return sprite.getGlobalPosition().x},
+					enumerable: true, configurable: true
+				  },
+				  "gy": {
+					get(){return sprite.getGlobalPosition().y},
+					enumerable: true, configurable: true
+				  },
+				  "centerX": {
+					get(){return sprite.x + sprite.width / 2},
+					enumerable: true, configurable: true
+				  },
+				  "centerY": {
+					get(){return sprite.y + sprite.height / 2},
+					enumerable: true, configurable: true
+				  },
+				  "halfWidth": {
+					get(){return sprite.width / 2},
+					enumerable: true, configurable: true
+				  },
+				  "halfHeight": {
+					get(){return sprite.height / 2},
+					enumerable: true, configurable: true
+				  },
+				  "xAnchorOffset": {
+					get(){
+					  if (sprite.anchor !== undefined) {
+						return sprite.height * sprite.anchor.x;
+					  } else {
+						return 0;
+					  }
 					},
 					enumerable: true, configurable: true
-				});
-			}
-
-			if (sprite.circular && sprite.radius === undefined)
-			{
-				Object.defineProperty(sprite, "radius", {
-					get () {return sprite.width / 2;},
+				  },
+				  "yAnchorOffset": {
+					get(){
+					  if (sprite.anchor !== undefined) {
+						return sprite.width * sprite.anchor.y;
+					  } else {
+						return 0;
+					  }
+					},
 					enumerable: true, configurable: true
+				  }
 				});
+				*/
 			}
-
-			//Earlier code - not needed now.
-			/*
-			Object.defineProperties(sprite, {
-			  "gx": {
-				get(){return sprite.getGlobalPosition().x},
-				enumerable: true, configurable: true
-			  },
-			  "gy": {
-				get(){return sprite.getGlobalPosition().y},
-				enumerable: true, configurable: true
-			  },
-			  "centerX": {
-				get(){return sprite.x + sprite.width / 2},
-				enumerable: true, configurable: true
-			  },
-			  "centerY": {
-				get(){return sprite.y + sprite.height / 2},
-				enumerable: true, configurable: true
-			  },
-			  "halfWidth": {
-				get(){return sprite.width / 2},
-				enumerable: true, configurable: true
-			  },
-			  "halfHeight": {
-				get(){return sprite.height / 2},
-				enumerable: true, configurable: true
-			  },
-			  "xAnchorOffset": {
-				get(){
-				  if (sprite.anchor !== undefined) {
-					return sprite.height * sprite.anchor.x;
-				  } else {
-					return 0;
-				  }
-				},
-				enumerable: true, configurable: true
-			  },
-			  "yAnchorOffset": {
-				get(){
-				  if (sprite.anchor !== undefined) {
-					return sprite.width * sprite.anchor.y;
-				  } else {
-					return 0;
-				  }
-				},
-				enumerable: true, configurable: true
-			  }
-			});
-			*/
 		}
 
 		//Add a Boolean `_bumpPropertiesAdded` property to the sprite to flag it
@@ -573,67 +654,66 @@ class Bump
 		if (!r1._bumpPropertiesAdded) this.addCollisionProperties(r1);
 		if (!r2._bumpPropertiesAdded) this.addCollisionProperties(r2);
 
-		let collision = {};
-		// combinedHalfWidths, combinedHalfHeights,
-		// 	overlapX, overlapY, vx, vy;
+		let collision, combinedHalfWidths, combinedHalfHeights,
+			overlapX, overlapY, vx, vy;
 
 		//Calculate the distance vector
 		if (global)
 		{
-			collision.vx = (r1.gx + Math.abs(r1.halfWidth) - r1.xAnchorOffset) - (r2.gx + Math.abs(r2.halfWidth) - r2.xAnchorOffset);
-			collision.vy = (r1.gy + Math.abs(r1.halfHeight) - r1.yAnchorOffset) - (r2.gy + Math.abs(r2.halfHeight) - r2.yAnchorOffset);
+			vx = (r1.gx + Math.abs(r1.halfWidth) - r1.xAnchorOffset) - (r2.gx + Math.abs(r2.halfWidth) - r2.xAnchorOffset);
+			vy = (r1.gy + Math.abs(r1.halfHeight) - r1.yAnchorOffset) - (r2.gy + Math.abs(r2.halfHeight) - r2.yAnchorOffset);
 		} else
 		{
 			//vx = r1.centerX - r2.centerX;
 			//vy = r1.centerY - r2.centerY;
-			collision.vx = (r1.x + Math.abs(r1.halfWidth) - r1.xAnchorOffset) - (r2.x + Math.abs(r2.halfWidth) - r2.xAnchorOffset);
-			collision.vy = (r1.y + Math.abs(r1.halfHeight) - r1.yAnchorOffset) - (r2.y + Math.abs(r2.halfHeight) - r2.yAnchorOffset);
+			vx = (r1.x + Math.abs(r1.halfWidth) - r1.xAnchorOffset) - (r2.x + Math.abs(r2.halfWidth) - r2.xAnchorOffset);
+			vy = (r1.y + Math.abs(r1.halfHeight) - r1.yAnchorOffset) - (r2.y + Math.abs(r2.halfHeight) - r2.yAnchorOffset);
 		}
 
 		//Figure out the combined half-widths and half-heights
-		collision.combinedHalfWidths = Math.abs(r1.halfWidth) + Math.abs(r2.halfWidth);
-		collision.combinedHalfHeights = Math.abs(r1.halfHeight) + Math.abs(r2.halfHeight);
+		combinedHalfWidths = Math.abs(r1.halfWidth) + Math.abs(r2.halfWidth);
+		combinedHalfHeights = Math.abs(r1.halfHeight) + Math.abs(r2.halfHeight);
 
 		//Check whether vx is less than the combined half widths
-		if (Math.abs(collision.vx) < collision.combinedHalfWidths)
+		if (Math.abs(vx) < combinedHalfWidths)
 		{
 
 			//A collision might be occurring!
 			//Check whether vy is less than the combined half heights
-			if (Math.abs(collision.vy) < collision.combinedHalfHeights)
+			if (Math.abs(vy) < combinedHalfHeights)
 			{
 
 				//A collision has occurred! This is good!
 				//Find out the size of the overlap on both the X and Y axes
-				collision.overlapX = collision.combinedHalfWidths - Math.abs(collision.vx);
-				collision.overlapY = collision.combinedHalfHeights - Math.abs(collision.vy);
+				overlapX = combinedHalfWidths - Math.abs(vx);
+				overlapY = combinedHalfHeights - Math.abs(vy);
 
 				//The collision has occurred on the axis with the
 				//*smallest* amount of overlap. Let's figure out which
 				//axis that is
 
-				if (collision.overlapX >= collision.overlapY)
+				if (overlapX >= overlapY)
 				{
 					//The collision is happening on the X axis
 					//But on which side? vy can tell us
-					collision.axis = "vy";
 
-					if (collision.vy > 0)
+					if (vy > 0)
 					{
-						collision.side = "top";
+						collision = "top";
 						//Move the rectangle out of the collision
-						// r1.y = r1.y + collision.overlapY;
+						r1.y = r1.y + overlapY;
 					} else
 					{
-						collision.side = "bottom";
+						collision = "bottom";
 						//Move the rectangle out of the collision
-						// r1.y = r1.y - collision.overlapY;
+						r1.y = r1.y - overlapY;
 					}
 
 					//Bounce
 					if (bounce)
 					{
 						r1.vy *= -1;
+						r1.vy /= r1.absorbtion;
 
 						/*Alternative
 						//Find the bounce surface's vx and vy properties
@@ -649,23 +729,24 @@ class Bump
 				{
 					//The collision is happening on the Y axis
 					//But on which side? vx can tell us
-					collision.axis = "vx";
-					if (collision.vx > 0)
+
+					if (vx > 0)
 					{
-						collision.side = "left";
+						collision = "left";
 						//Move the rectangle out of the collision
-						// r1.x = r1.x + collision.overlapX;
+						r1.x = r1.x + overlapX;
 					} else
 					{
-						collision.side = "right";
+						collision = "right";
 						//Move the rectangle out of the collision
-						// r1.x = r1.x - collision.overlapX;
+						r1.x = r1.x - overlapX;
 					}
 
 					//Bounce
 					if (bounce)
 					{
 						r1.vx *= -1;
+						r1.vx /= r1.absorbtion;
 
 						/*Alternative
 						//Find the bounce surface's vx and vy properties
@@ -1440,12 +1521,10 @@ class Bump
 			rectangleCollision = this.rectangleCollision.bind(this),
 			circleRectangleCollision = this.circleRectangleCollision.bind(this);
 
-		let collision,
-			aIsASprite = a.parent !== undefined,
-			bIsASprite = b.parent !== undefined;
+		let collision;
 
 		//Check to make sure one of the arguments isn't an array
-		if (aIsASprite && b instanceof Array || bIsASprite && a instanceof Array)
+		if (a.isSprite && b instanceof Array || b.isSprite && a instanceof Array)
 		{
 			//If it is, check for a collision between a sprite and an array
 			spriteVsArray();
@@ -1469,20 +1548,22 @@ class Bump
 			//Are `a` and `b` both sprites?
 			//(We have to check again if this function was called from
 			//`spriteVsArray`)
-			let aIsASprite = a.parent !== undefined;
-			let bIsASprite = b.parent !== undefined;
 
-			if (aIsASprite && bIsASprite)
+			if (a.isSprite && b.isSprite)
 			{
 				//Yes, but what kind of sprites?
-				if (a.diameter && b.diameter)
+				if (a.radius && b.radius)
 				{
 					//They're circles
 					return circleVsCircle(a, b);
-				} else if (a.diameter && !b.diameter)
+				} else if (a.radius && !b.radius)
 				{
 					//The first one is a circle and the second is a rectangle
 					return circleVsRectangle(a, b);
+				} else if (!a.radius && b.radius)
+				{
+					//The second one is a circle and the first is a rectangle
+					return circleVsRectangle(b, a);
 				} else
 				{
 					//They're rectangles
@@ -1491,7 +1572,7 @@ class Bump
 			}
 			//They're not both sprites, so what are they?
 			//Is `a` not a sprite and does it have x and y properties?
-			else if (bIsASprite && !(a.x === undefined) && !(a.y === undefined))
+			else if (b.isSprite && !(a.x === undefined) && !(a.y === undefined))
 			{
 				//Yes, so this is a point vs. sprite collision test
 				return hitTestPoint(a, b);

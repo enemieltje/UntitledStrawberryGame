@@ -10,8 +10,8 @@ class Loader
 
 	static load ()
 	{
-		GameData.setSpriteOffset("jerryIdle.json", 0, -16);
-		GameData.setSpriteOffset("runningJerry.json", 0, -27);
+		GameData.setSpriteOffset("jerryIdle.json", -10, -16);
+		GameData.setSpriteOffset("runningJerry.json", -10, -27);
 		// GameData.setSpriteOffset("runningJerry.json", {x: 0, y: 0});
 		return new Promise((resolve) =>
 		{

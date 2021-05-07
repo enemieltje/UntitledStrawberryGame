@@ -6,14 +6,29 @@ class GameObject
 	name;
 	id;
 	currentImageName;
-	#imageObject = {};
 
 	#applyPhisics = false;
 
 	chunks = [];
 	collisionChunks = [];
 
-	constructor (name, initialX = 64, initialY = 64, textures, hitBox)
+	spriteOffset = {x: 0, y: 0};
+	x = 0;
+	y = 0;
+	vx = 0;
+	vy = 0;
+	ax = 0;
+	ay = 0;
+	absorbtion = 1;
+	static = true;
+	drag = 0;
+	mass = 1;
+	width;
+	height;
+	radius;
+	isSprite = true;
+
+	constructor (name, properties, textures)
 	{
 		// textures ? "" : textures = [app.loader.resources[`game/sprites/${name}.png`].texture];
 		textures ? "" : textures = GameData.getSprite(`${name}.png`);
@@ -22,26 +37,34 @@ class GameObject
 
 		this.sprite = new PIXI.AnimatedSprite(textures);
 
-		hitBox ? "" : hitBox = new PIXI.Rectangle(0, 0, this.sprite.width, this.sprite.height);
-		this.sprite.hitBox = hitBox;
+		// hitBox ? "" : hitBox = new PIXI.Rectangle(0, 0, this.sprite.width, this.sprite.height);
+		// this.sprite.hitBox = hitBox;
 
 		this.sprite.play();
 
-		this.sprite.properties = {
-			absorbtion: 1,
-			static: true,
-			drag: 0,
-			mass: 1
-		};
+		Object.keys(properties).forEach((property) =>
+		{
+			this[property] = properties[property];
+		});
 
-		this.sprite.ax = 0;
-		this.sprite.ay = 0;
+		this.sprite.x = this.x;
+		this.sprite.y = this.y;
 
-		this.sprite.vx = 0;
-		this.sprite.vy = 0;
+		// this.sprite.properties = {
+		// 	absorbtion: 1,
+		// 	static: true,
+		// 	drag: 0,
+		// 	mass: 1
+		// };
 
-		this.sprite.x = initialX;
-		this.sprite.y = initialY;
+		// this.sprite.ax = 0;
+		// this.sprite.ay = 0;
+
+		// this.sprite.vx = 0;
+		// this.sprite.vy = 0;
+
+		// this.sprite.x = initialX;
+		// this.sprite.y = initialY;
 	}
 
 	addToParent (parent = viewport)
@@ -88,25 +111,36 @@ class GameObject
 			this.updateChunk();
 			this.fixCollision();
 
-			const hitBox = GameData.getSpriteOffset(this.currentImageName);
-			this.sprite.hitBox.x = -hitBox.x - this.sprite.anchor.x * this.sprite.width + this.sprite.x;
-			this.sprite.hitBox.y = -hitBox.y - this.sprite.anchor.y * this.sprite.height + this.sprite.y;
+			// const hitBox = GameData.getSpriteOffset(this.currentImageName);
+			// this.sprite.hitBox.x = -hitBox.x - this.sprite.anchor.x * this.sprite.width + this.sprite.x;
+			// this.sprite.hitBox.y = -hitBox.y - this.sprite.anchor.y * this.sprite.height + this.sprite.y;
+
+			this.sprite.x = this.x + this.sprite.anchor.x * this.sprite.width + this.spriteOffset.x;
+			this.sprite.y = this.y + this.sprite.anchor.y * this.sprite.height + this.spriteOffset.y;
 		}
 	}
 
 	move (delta)
 	{
-		if (this.sprite.properties.static) return;
-		// console.log(`drag: ${this.sprite.properties.drag}, vx: ${this.sprite.vx}` +
-		// 	`drag X: ${this.sprite.properties.drag * this.sprite.vx * delta}`);
-		this.sprite.vx -= this.sprite.properties.drag * this.sprite.vx * delta;
-		this.sprite.vy -= this.sprite.properties.drag * this.sprite.vy * delta;
+		if (this.sprite.static) return;
 
-		this.sprite.vx += this.sprite.ax * delta;
-		this.sprite.vy += this.sprite.ay * delta;
+		// this.sprite.vx -= this.sprite.properties.drag * this.sprite.vx * delta;
+		// this.sprite.vy -= this.sprite.properties.drag * this.sprite.vy * delta;
 
-		this.sprite.x += this.sprite.vx * delta;
-		this.sprite.y += this.sprite.vy * delta;
+		// this.sprite.vx += this.sprite.ax * delta;
+		// this.sprite.vy += this.sprite.ay * delta;
+
+		// this.sprite.x += this.sprite.vx * delta;
+		// this.sprite.y += this.sprite.vy * delta;
+
+		this.vx -= this.drag * this.vx * delta;
+		this.vy -= this.drag * this.vy * delta;
+
+		this.vx += this.ax * delta;
+		this.vy += this.ay * delta;
+
+		this.x += this.vx * delta;
+		this.y += this.vy * delta;
 	}
 
 	updateChunk ()
@@ -117,10 +151,14 @@ class GameObject
 		{
 			const xCoords = new Set();
 			const yCoords = new Set();
+			// xCoords.add(Math.floor(this.absX() / chunksize.x));
+			// xCoords.add(Math.floor((this.absX() + this.sprite.width) / chunksize.x));
+			// yCoords.add(Math.floor(this.absY() / chunksize.y));
+			// yCoords.add(Math.floor((this.absY() + this.sprite.height) / chunksize.y));
 			xCoords.add(Math.floor(this.absX() / chunksize.x));
-			xCoords.add(Math.floor((this.absX() + this.sprite.width) / chunksize.x));
+			xCoords.add(Math.floor((this.absX() + this.width) / chunksize.x));
 			yCoords.add(Math.floor(this.absY() / chunksize.y));
-			yCoords.add(Math.floor((this.absY() + this.sprite.height) / chunksize.y));
+			yCoords.add(Math.floor((this.absY() + this.height) / chunksize.y));
 
 			xCoords.forEach((x) =>
 			{
@@ -146,8 +184,10 @@ class GameObject
 		this.chunks = newChunks;
 		this.collisionChunks = [];
 
-		const cX = Math.round(this.sprite.hitBox.x / chunksize.x);
-		const cY = Math.round(this.sprite.hitBox.y / chunksize.y);
+		// const cX = Math.round(this.sprite.hitBox.x / chunksize.x);
+		// const cY = Math.round(this.sprite.hitBox.y / chunksize.y);
+		const cX = Math.round(this.x / chunksize.x);
+		const cY = Math.round(this.y / chunksize.y);
 
 		this.collisionChunks.push(new Coord(cX, cY));
 		this.collisionChunks.push(new Coord(cX - 1, cY));
@@ -197,106 +237,81 @@ class GameObject
 
 		if (collisionCandidates.size < 1) return;
 
-		const candidateArray = [];
 		collisionCandidates.forEach((candidate) =>
 		{
 			// candidateArray.push(candidate);
 
-			// console.log(JSON.stringify(this.sprite.hitBox));
+			bump.hit(this, candidate, true, true);
+			// const collision = bump.hit(this.sprite.hitBox, candidate.sprite.hitBox, true, false);
+			// if (!(collision.side || collision.region) || candidate.sprite.properties.static && this.sprite.properties.static) return;
+			// // console.log(`${this.name} ${candidate.name}`);
+			// // console.log(collision);
+			// let axis;
 
-			const collision = bump.rectangleCollision(this.sprite.hitBox, candidate.sprite.hitBox, false, false);
-			if (!collision.side || candidate.sprite.properties.static && this.sprite.properties.static) return;
-			// console.log(`${this.name} ${candidate.name}`);
-			let axis;
+			// const v1 = this.sprite[axis];
+			// const v2 = candidate.sprite[axis];
+			// const m1 = this.sprite.properties.mass;
+			// const m2 = candidate.sprite.properties.mass;
+			// const absorbtion = candidate.sprite.properties.absorbtion * this.sprite.properties.absorbtion;
 
-			// switch (collision.side)
+			// if (candidate.sprite.properties.static)
 			// {
-			// 	case "left":
-			// 	case "right":
-			// 		axis = "vx";
-			// 		break;
-			// 	case "top":
-			// 	case "bottom":
-			// 		axis = "vy";
-			// 		break;
+			// 	if (collision.side)
+			// 	{
+			// 		switch (collision.side)
+			// 		{
+			// 			case "left":
+			// 				this.sprite.x = this.sprite.x + collision.overlapX;
+			// 				break;
+			// 			case "right":
+			// 				this.sprite.x = this.sprite.x - collision.overlapX;
+			// 				break;
+			// 			case "top":
+			// 				this.sprite.y = this.sprite.y + collision.overlapY;
+			// 				break;
+			// 			case "bottom":
+			// 				this.sprite.y = this.sprite.y - collision.overlapY;
+			// 				break;
+			// 		}
+			// 		this.sprite[collision.axis] *= -1;
+			// 		this.sprite[collision.axis] /= absorbtion;
+			// 	} else if (collision.region)
+			// 	{
+			// 		switch (collision.region)
+			// 		{
+			// 			case "topLeft":
+			// 				this.sprite.x = collision.r1x;
+			// 				this.sprite.y = collision.r1y;
+			// 				break;
+
+			// 			case "topRight":
+			// 				point.x = collision.r1x + r1.width;
+			// 				point.y = collision.r1y;
+			// 				break;
+
+			// 			case "bottomLeft":
+			// 				point.x = collision.r1x;
+			// 				point.y = collision.r1y + r1.height;
+			// 				break;
+
+			// 			case "bottomRight":
+			// 				point.x = collision.r1x + r1.width;
+			// 				point.y = collision.r1y + r1.height;
+			// 		}
+			// 	}
+			// } else if (this.sprite.properties.static)
+			// {
+			// 	candidate.sprite[collision.axis] *= -1;
+			// 	candidate.sprite[collision.axis] /= absorbtion;
+			// } else
+			// {
+			// 	candidate.sprite[collision.axis] = (2 * m1) / (m1 + m2) * v1 - ((m1 - m2) / (m1 + m2)) * v2;
+			// 	candidate.sprite[collision.axis] /= absorbtion;
+
+			// 	this.sprite[collision.axis] = ((m1 - m2) / (m1 + m2)) * v1 + (2 * m1) / (m1 + m2) * v2;
+			// 	this.sprite[collision.axis] /= absorbtion;
 			// }
-			const v1 = this.sprite[axis];
-			const v2 = candidate.sprite[axis];
-			const m1 = this.sprite.properties.mass;
-			const m2 = candidate.sprite.properties.mass;
-			const absorbtion = candidate.sprite.properties.absorbtion * this.sprite.properties.absorbtion;
-
-			if (candidate.sprite.properties.static)
-			{
-				switch (collision.side)
-				{
-					case "left":
-						this.sprite.x = this.sprite.x + collision.overlapX;
-						break;
-					case "right":
-						this.sprite.x = this.sprite.x - collision.overlapX;
-						break;
-					case "top":
-						this.sprite.y = this.sprite.y + collision.overlapY;
-						break;
-					case "bottom":
-						this.sprite.y = this.sprite.y - collision.overlapY;
-						break;
-				}
-				this.sprite[collision.axis] *= -1;
-				this.sprite[collision.axis] /= absorbtion;
-			} else if (this.sprite.properties.static)
-			{
-				candidate.sprite[collision.axis] *= -1;
-				candidate.sprite[collision.axis] /= absorbtion;
-			} else
-			{
-				candidate.sprite[collision.axis] = (2 * m1) / (m1 + m2) * v1 - ((m1 - m2) / (m1 + m2)) * v2;
-				candidate.sprite[collision.axis] /= absorbtion;
-
-				this.sprite[collision.axis] = ((m1 - m2) / (m1 + m2)) * v1 + (2 * m1) / (m1 + m2) * v2;
-				this.sprite[collision.axis] /= absorbtion;
-			}
 		});
-		// bump.hit(this.sprite, candidateArray, true, false, false, (side, otherObject) =>
-		// {
-		// 	if (otherObject.properties.static && this.sprite.properties.static) return;
-		// 	let axis;
-
-		// 	switch (side)
-		// 	{
-		// 		case "left":
-		// 		case "right":
-		// 			axis = "vx";
-		// 			break;
-		// 		case "top":
-		// 		case "bottom":
-		// 			axis = "vy";
-		// 			break;
-		// 	}
-		// 	const v1 = this.sprite[axis];
-		// 	const v2 = otherObject[axis];
-		// 	const m1 = this.sprite.properties.mass;
-		// 	const m2 = otherObject.properties.mass;
-		// 	const absorbtion = otherObject.properties.absorbtion * this.sprite.properties.absorbtion;
-
-		// 	if (otherObject.properties.static)
-		// 	{
-		// 		this.sprite[axis] *= -1;
-		// 		this.sprite[axis] /= absorbtion;
-		// 	} else if (this.sprite.properties.static)
-		// 	{
-		// 		otherObject[axis] *= -1;
-		// 		otherObject[axis] /= absorbtion;
-		// 	} else
-		// 	{
-		// 		otherObject[axis] = (2 * m1) / (m1 + m2) * v1 - ((m1 - m2) / (m1 + m2)) * v2;
-		// 		otherObject[axis] /= absorbtion;
-
-		// 		this.sprite[axis] = ((m1 - m2) / (m1 + m2)) * v1 + (2 * m1) / (m1 + m2) * v2;
-		// 		this.sprite[axis] /= absorbtion;
-		// 	}
-		// });
 	}
 
 	set image (imageName)
@@ -311,10 +326,16 @@ class GameObject
 			}
 			const oldHitBox = GameData.getSpriteOffset(this.currentImageName);
 			const hitBox = GameData.getSpriteOffset(imageName);
-			this.sprite.x -= oldHitBox.x;
-			this.sprite.y -= oldHitBox.y;
-			this.sprite.x += hitBox.x;
-			this.sprite.y += hitBox.y;
+
+			this.spriteOffset = GameData.getSpriteOffset(imageName);
+			// this.sprite.x -= oldHitBox.x;
+			// this.sprite.y -= oldHitBox.y;
+			// this.sprite.x += hitBox.x;
+			// this.sprite.y += hitBox.y;
+			// this.x -= oldHitBox.x;
+			// this.y -= oldHitBox.y;
+			// this.x += hitBox.x;
+			// this.y += hitBox.y;
 			this.sprite.textures = image;
 			this.sprite.play();
 			this.currentImageName = imageName;
@@ -328,11 +349,13 @@ class GameObject
 
 	absX ()
 	{
-		return this.sprite.x - this.sprite.anchor.x * this.sprite.width;
+		// return this.sprite.x - this.sprite.anchor.x * this.sprite.width;
+		return this.x - this.sprite.anchor.x * this.width;
 	}
 
 	absY ()
 	{
-		return this.sprite.y - this.sprite.anchor.y * this.sprite.height;
+		// return this.sprite.y - this.sprite.anchor.y * this.sprite.height;
+		return this.y - this.sprite.anchor.y * this.height;
 	}
 }

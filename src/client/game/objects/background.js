@@ -3,7 +3,7 @@ class Background extends GameObject
 	static name = "background";
 	constructor (x, y, sprite)
 	{
-		super(Background.name, x, y, [sprite]);
+		super(Background.name, {x: x, y: y}, [sprite]);
 	}
 
 	static onLoad ()
