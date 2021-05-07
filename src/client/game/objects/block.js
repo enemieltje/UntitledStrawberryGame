@@ -43,3 +43,5 @@ class Block extends GameObject
 		});
 	}
 }
+
+Loader.objectTypes.push(Block);

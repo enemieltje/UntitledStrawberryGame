@@ -49,3 +49,5 @@ class Background extends GameObject
 		}
 	}
 }
+
+Loader.objectTypes.push(Background);

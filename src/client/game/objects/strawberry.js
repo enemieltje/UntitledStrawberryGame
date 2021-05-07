@@ -13,7 +13,7 @@ class Strawberry extends GameObject
 	gravity = 0.5;
 	// texture = "running";
 
-	disableGravity = false;
+	disableGravity = true;
 	rect = {};
 	debugScreen;
 	constructor ()
@@ -149,23 +149,12 @@ class Strawberry extends GameObject
 
 		if (this.sprite.vx * sign < 0.5)
 		{
-			// if (this.currentImageName != "idle" && this.sprite.currentFrame == 0)
-			// {
-			// 	this.sprite.stop();
-
-			// 	this.currentImageName = "idle";
-			// }
+			this.sprite.animationSpeed = 0.1;
 			this.image = "jerryIdle.json";
 		} else
 		{
+			this.sprite.animationSpeed = this.sprite.vx / 16 * sign;
 			this.image = "runningJerry.json";
-			// if (this.texture != "running")
-			// {
-			// 	// const image = GameData.getSprite(imageName);
-			// 	this.sprite.textures = Strawberry.tileset;
-			// 	this.sprite.play();
-			// 	this.texture = "running";
-			// }
 		}
 		this.sprite.scale.x = sign;
 
@@ -205,8 +194,16 @@ class Strawberry extends GameObject
 
 			let isFloating = true;
 
-			// const hitBox = new PIXI.Rectangle(Math.round(this.absX()), Math.round(this.absY() + this.sprite.height), this.sprite.width, 1);
 			const hitBox = new PIXI.Rectangle(Math.round(this.sprite.hitBox.x), Math.round(this.sprite.hitBox.y + this.sprite.hitBox.height), this.sprite.hitBox.width, 1);
+
+			collisionCandidates.forEach(object =>
+			{
+				if (bump.hitTestRectangle(hitBox, object.hitBox))
+				{
+					isFloating = false;
+				}
+			});
+
 			// viewport.removeChild(this.rect);
 			// this.rect = new PIXI.Graphics();
 			// this.rect.beginFill(0x00FF00);
@@ -217,19 +214,10 @@ class Strawberry extends GameObject
 			// viewport.addChild(this.rect);
 			// console.log(collisionCandidates.length);
 
-			collisionCandidates.forEach(object =>
-			{
-				// console.log(`${object.x}, ${object.y}, ${object.width}, ${object.height}`);
-				// const blockRect = new PIXI.Rectangle(object.x, object.y, object.width, object.height);
-				if (bump.hitTestRectangle(hitBox, object.hitBox))
-				{
-					// console.log("hit!");
-					isFloating = false;
-				}
-			});
-
-
 			this.sprite.ay = this.gravity * isFloating;
 		}
 	}
 }
+
+Loader.objectTypes.push(Strawberry);
+

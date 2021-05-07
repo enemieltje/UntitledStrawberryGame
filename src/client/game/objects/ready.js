@@ -24,3 +24,5 @@ class Ready extends GameObject
 		this.sprite.y = 96;
 	}
 }
+
+Loader.objectTypes.push(Ready);

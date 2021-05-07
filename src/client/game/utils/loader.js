@@ -1,7 +1,8 @@
 class Loader
 {
 	// will be done automatically for each object file
-	static objectTypes = [Strawberry, Ready, Background, Block];
+	// static objectTypes = [Strawberry, Ready, Background, Block, Planet];
+	static objectTypes = [];
 
 	static spritesReady = false;
 	static soundsReady = false;

@@ -95,6 +95,7 @@ function onStart ()
 		object.addToParent();
 	});
 
+	GameData.getObjectFromName("planet").addToParent();
 	GameData.getObjectFromName("strawberry").addToParent();
 	viewport.follow(GameData.getObjectFromName("strawberry").sprite, {radius: 192});
 
@@ -109,6 +110,7 @@ function tick (delta)
 
 function walkTick (delta)
 {
+	GameData.getObjectFromName("planet").step(delta);
 	GameData.getObjectFromName("strawberry").step(delta);
 	GameData.getObjectArrayFromName("block").forEach((block) =>
 	{
