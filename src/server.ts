@@ -66,10 +66,21 @@ export default class HttpServer
 
 		const path = "./src/client";
 		let file: Uint8Array;
-
+		const folders = req.url.split("/");
+		const targetedFile = folders[folders.length - 1];
+		const extentionDotCount = (targetedFile.match(/\./g) || []).length;
+		const totalDotCount = (req.url.match(/\./g) || []).length;
 		try
 		{
-			file = Deno.readFileSync(`${path}/${req.url}`);
+			if (req.url.includes("./") || totalDotCount > extentionDotCount)
+			{
+				file = Deno.readFileSync(`${path}/index.html`);
+				console.debug("malicious request, responded with index html");
+			}
+			else
+			{
+				file = Deno.readFileSync(`${path}/${req.url}`);
+			}
 		} catch (error)
 		{
 			file = Deno.readFileSync(`${path}/index.html`);
