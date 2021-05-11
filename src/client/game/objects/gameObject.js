@@ -2,7 +2,6 @@ class GameObject
 {
 	static soundFiles = [];
 
-	vis = [];
 	sprite;
 	name;
 	id;
@@ -14,6 +13,7 @@ class GameObject
 	collisionChunks = [];
 
 	spriteOffset = {x: 0, y: 0};
+	rotation = 0;
 	x = 0;
 	y = 0;
 	vx = 0;
@@ -105,8 +105,19 @@ class GameObject
 			this.updateChunk();
 			this.fixCollision();
 
+			if (this.radius)
+			{
+				this.centerX = this.x + this.radius;
+				this.centerY = this.y + this.radius;
+			} else
+			{
+				this.centerX = this.x + this.width / 2;
+				this.centerY = this.y + this.height / 2;
+			}
+
 			this.sprite.x = this.x + this.sprite.anchor.x * this.sprite.width + this.spriteOffset.x;
 			this.sprite.y = this.y + this.sprite.anchor.y * this.sprite.height + this.spriteOffset.y;
+			this.sprite.rotation = this.rotation;
 		}
 	}
 
@@ -127,21 +138,18 @@ class GameObject
 			this.vy += this.forces.y[forceYName] * delta;
 		});
 
-		this.vx += this.ax * delta;
-		this.vy += this.ay * delta;
+		let resultAx = 0, resultAy = 0;
+
+		// resultAx += this.relAx * Math.cos(this.rotation);
+		// resultAx += this.relAy * Math.sin(this.rotation);
+		// resultAy += this.relAx * Math.sin(this.rotation);
+		// resultAy += this.relAy * Math.cos(this.rotation);
+
+		this.vx += (this.ax + resultAx) * delta;
+		this.vy += (this.ay + resultAy) * delta;
 
 		this.x += this.vx * delta;
 		this.y += this.vy * delta;
-
-		if (this.radius)
-		{
-			this.centerX = this.x + this.radius;
-			this.centerY = this.y + this.radius;
-		} else
-		{
-			this.centerX = this.x + this.width / 2;
-			this.centerY = this.y + this.height / 2;
-		}
 	}
 
 	updateChunk ()
@@ -173,14 +181,6 @@ class GameObject
 					newChunks.push(new Coord(x, y));
 				}
 			}
-
-			// xCoords.forEach((x) =>
-			// {
-			// 	yCoords.forEach((y) =>
-			// 	{
-			// 		newChunks.push(new Coord(x, y));
-			// 	});
-			// });
 		}
 
 		if (newChunks.toString() != this.chunks.toString())
@@ -205,27 +205,6 @@ class GameObject
 		this.collisionChunks.push(new Coord(cX - 1, cY));
 		this.collisionChunks.push(new Coord(cX, cY - 1));
 		this.collisionChunks.push(new Coord(cX - 1, cY - 1));
-
-		this.vis.forEach((rect) =>
-		{
-			viewport.removeChild(rect);
-		});
-
-		this.vis = [];
-
-
-		// this.chunks.forEach((chunk) =>
-		// {
-		// 	const rect = new PIXI.Graphics();
-		// 	rect.lineStyle(4, 0xFF3300, 1);
-		// 	rect.drawRect(0, 0, chunksize.x, chunksize.y);
-		// 	rect.endFill();
-		// 	rect.x = chunk.x * chunksize.x;
-		// 	rect.y = chunk.y * chunksize.y;
-		// 	this.vis.push(rect);
-		// 	viewport.addChild(rect);
-		// });
-
 	}
 
 	fixCollision ()
@@ -278,6 +257,53 @@ class GameObject
 	get image ()
 	{
 		return this.currentImageName;
+	}
+
+	set relAx (relAx)
+	{
+		this.ax = relAx * Math.cos(this.rotation) + this.relAx * Math.sin(this.rotation);
+		this.ay = relAx * Math.sin(this.rotation) + this.relAy * Math.cos(this.rotation);
+	}
+
+	get relAx ()
+	{
+		return this.ax * Math.cos(this.rotation) + this.ay * Math.sin(this.rotation);
+	}
+
+	set relAy (relAy)
+	{
+		this.ax = relAy * Math.sin(this.rotation) + this.relAx * Math.cos(this.rotation);
+		this.ay = relAy * Math.cos(this.rotation) + this.relAy * Math.sin(this.rotation);
+	}
+
+	get relAy ()
+	{
+		return this.ax * Math.sin(this.rotation) + this.ay * Math.cos(this.rotation);
+	}
+
+
+
+
+	set relVx (relVx)
+	{
+		this.vx = relVx * Math.cos(this.rotation) + this.relVx * Math.sin(this.rotation);
+		this.vy = relVx * Math.sin(this.rotation) + this.relVx * Math.cos(this.rotation);
+	}
+
+	get relVx ()
+	{
+		return this.vx * Math.cos(this.rotation) + this.vy * Math.sin(this.rotation);
+	}
+
+	set relVy (relVy)
+	{
+		this.vx = relVy * Math.sin(this.rotation) + this.relVx * Math.cos(this.rotation);
+		this.vy = relVy * Math.cos(this.rotation) + this.relVx * Math.sin(this.rotation);
+	}
+
+	get relVy ()
+	{
+		return this.vx * Math.sin(this.rotation) + this.vy * Math.cos(this.rotation);
 	}
 
 	absX ()

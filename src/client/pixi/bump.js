@@ -470,17 +470,17 @@ class Bump
 			}
 
 			//Bounce
-			if (bounce)
-			{
-				//Create a collision vector object, `s` to represent the bounce "surface".
-				//Find the bounce surface's x and y properties
-				//(This represents the normal of the distance vector between the circles)
-				s.x = vy;
-				s.y = -vx;
+			// if (bounce)
+			// {
+			//Create a collision vector object, `s` to represent the bounce "surface".
+			//Find the bounce surface's x and y properties
+			//(This represents the normal of the distance vector between the circles)
+			s.x = vy;
+			s.y = -vx;
 
-				//Bounce c1 off the surface
-				this.bounceOffSurface(c1, s, moveObject);
-			}
+			//Bounce c1 off the surface
+			this.bounceOffSurface(c1, s, moveObject, bounce);
+			// }
 		}
 		return hit;
 	}
@@ -1229,7 +1229,7 @@ class Bump
 	be used to dampen the bounce effect.
 	*/
 
-	bounceOffSurface (o, s, moveObject = false)
+	bounceOffSurface (o, s, moveObject = false, doBounce = true)
 	{
 
 		//Add collision properties
@@ -1262,49 +1262,67 @@ class Bump
 		{
 			o.vx /= (o.absorbtion - 1) * Math.abs(s.dy) + 1;
 			o.vy /= (o.absorbtion - 1) * Math.abs(s.dx) + 1;
-			// console.log(`${(o.absorbtion - 1) * Math.abs(s.dy) + 1}, ${(o.absorbtion - 1) * Math.abs(s.dx) + 1}`);
 		}
-		//2. Bounce the object (o) off the surface (s)
 
-		//Find the dot product between the object and the surface
-		dp1 = o.vx * s.dx + o.vy * s.dy;
-
-		//Project the object's velocity onto the collision surface
-		p1.vx = dp1 * s.dx;
-		p1.vy = dp1 * s.dy;
-
-		//Find the dot product of the object and the surface's left normal (s.lx and s.ly)
-		dp2 = o.vx * (s.lx / s.magnitude) + o.vy * (s.ly / s.magnitude);
-
-		//Project the object's velocity onto the surface's left normal
-		p2.vx = dp2 * (s.lx / s.magnitude);
-		p2.vy = dp2 * (s.ly / s.magnitude);
-
-		//Reverse the projection on the surface's left normal
-		p2.vx *= -1;
-		p2.vy *= -1;
-
-
-		//Add up the projections to create a new bounce vector
-		bounce.x = p1.vx + p2.vx;
-		bounce.y = p1.vy + p2.vy;
-
-		//Assign the bounce vector to the object's velocity
-		//with optional mass to dampen the effect
-		// if (frame == 60)
-		// console.log(`${s.dx}, ${s.dy}`);
-		if (moveObject)
+		if (doBounce)
 		{
-			moveObject.vx = -bounce.x / mass;
-			// moveObject.vx /= moveObject.absorbtion * Math.abs(s.dy);
-			moveObject.vy = -bounce.y / mass;
-			// moveObject.vy /= moveObject.absorbtion * Math.abs(s.dx);
+			//2. Bounce the object (o) off the surface (s)
+
+			//Find the dot product between the object and the surface
+			dp1 = o.vx * s.dx + o.vy * s.dy;
+
+			//Project the object's velocity onto the collision surface
+			p1.vx = dp1 * s.dx;
+			p1.vy = dp1 * s.dy;
+
+			//Find the dot product of the object and the surface's left normal (s.lx and s.ly)
+			dp2 = o.vx * (s.lx / s.magnitude) + o.vy * (s.ly / s.magnitude);
+
+			//Project the object's velocity onto the surface's left normal
+			p2.vx = dp2 * (s.lx / s.magnitude);
+			p2.vy = dp2 * (s.ly / s.magnitude);
+
+			//Reverse the projection on the surface's left normal
+			p2.vx *= -1;
+			p2.vy *= -1;
+
+
+			//Add up the projections to create a new bounce vector
+			bounce.x = p1.vx + p2.vx;
+			bounce.y = p1.vy + p2.vy;
+
+			//Assign the bounce vector to the object's velocity
+			//with optional mass to dampen the effect
+			// if (frame == 60)
+			// console.log(`${s.dx}, ${s.dy}`);
+			if (moveObject)
+			{
+				moveObject.vx = -bounce.x / mass;
+				// moveObject.vx /= moveObject.absorbtion * Math.abs(s.dy);
+				moveObject.vy = -bounce.y / mass;
+				// moveObject.vy /= moveObject.absorbtion * Math.abs(s.dx);
+			} else
+			{
+				o.vx = bounce.x / mass;
+				// o.vx /= o.absorbtion * Math.abs(s.dy);
+				o.vy = bounce.y / mass;
+				// o.vy /= o.absorbtion * Math.abs(s.dx);
+			}
 		} else
 		{
-			o.vx = bounce.x / mass;
-			// o.vx /= o.absorbtion * Math.abs(s.dy);
-			o.vy = bounce.y / mass;
-			// o.vy /= o.absorbtion * Math.abs(s.dx);
+			if (moveObject)
+			{
+				const magn = moveObject.vx * s.dx + moveObject.vy * s.dy;
+
+				moveObject.vx = s.dx * magn / mass;
+				moveObject.vy = s.dy * magn / mass;
+			} else
+			{
+				const magn = o.vx * s.dx + o.vy * s.dy;
+
+				o.vx = s.dx * magn / mass;
+				o.vy = s.dy * magn / mass;
+			}
 		}
 	}
 

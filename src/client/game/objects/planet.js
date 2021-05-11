@@ -6,7 +6,7 @@ class Planet extends GameObject
 	constructor ()
 	{
 		// const properties = {x: 1024, y: 1024, height: 128, width: 128};
-		const properties = {x: 1024, y: 1024, radius: 8000, mass: 1000000};
+		const properties = {x: 1024, y: 1024, radius: 8000, mass: 10000000};
 		super(Planet.name, properties);
 		this.applyPhisics = true;
 		// this.x = 1024 - this.radius;
