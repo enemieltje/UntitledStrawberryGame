@@ -7,6 +7,8 @@ const chunksize = {
 	y: 256
 };
 
+let frame = 0;
+
 // sounds
 let beepBox;
 
@@ -26,16 +28,16 @@ document.body.appendChild(app.view);
 const viewport = new pixi_viewport.Viewport({
 	screenWidth: window.innerWidth,
 	screenHeight: window.innerHeight - 4,
-	worldWidth: 2048,
-	worldHeight: 2048,
+	// worldWidth: 2048,
+	// worldHeight: 2048,
 	interaction: app.renderer.plugins.interaction
 });
 app.stage.addChild(viewport);
 
 viewport
 	.drag()
-	.wheel()
-	.clamp({direction: 'all'});
+	.wheel();
+// .clamp({direction: 'all'});
 
 loadLoadingScreen();
 
@@ -53,8 +55,15 @@ function loadingScreen ()
 {
 	loading = new PIXI.Sprite(app.loader.resources["game/sprites/loading.png"].texture);
 
-	loading.x = 32;
-	loading.y = 96;
+	const scaleX = window.innerWidth / loading.width;
+	const scaleY = window.innerHeight - 4 / loading.height;
+
+	const scale = Math.min(scaleX, scaleY);
+
+	loading.scale.set(scale, scale);
+
+	// loading.x = 32;
+	// loading.y = 96;
 
 	app.stage.addChild(loading);
 
@@ -97,10 +106,13 @@ function onStart ()
 
 	GameData.getObjectFromName("planet").addToParent();
 	GameData.getObjectFromName("strawberry").addToParent();
-	viewport.follow(GameData.getObjectFromName("strawberry").sprite, {radius: 192});
+	viewport.addChild(GameData.getObjectFromName("follower"));
+	// viewport.follow(GameData.getObjectFromName("strawberry").sprite, {radius: 192});
+	viewport.follow(GameData.getObjectFromName("follower"), {radius: 0});
 
 	BeepBox = sounds["game/sounds/BeepBox-Song.mp3"];
 	BeepBox.play();
+	GameData.getObjectFromName("planet").drawShape();
 }
 
 function tick (delta)
@@ -110,8 +122,11 @@ function tick (delta)
 
 function walkTick (delta)
 {
-	GameData.getObjectFromName("planet").step(delta);
+	GameData.frame++;
+	if (GameData.frame >= 60) GameData.frame = 0;
+
 	GameData.getObjectFromName("strawberry").step(delta);
+	GameData.getObjectFromName("planet").step(delta);
 	GameData.getObjectArrayFromName("block").forEach((block) =>
 	{
 		block.step(delta);

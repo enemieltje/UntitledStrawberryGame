@@ -10,6 +10,8 @@ class GameData
 
 	static idGeneratorId = 0;
 
+	static frame = 0;
+
 	static genId ()
 	{
 		this.idGeneratorId++;

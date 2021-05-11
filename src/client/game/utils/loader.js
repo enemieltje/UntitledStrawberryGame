@@ -32,13 +32,15 @@ class Loader
 		return new Promise(resolve =>
 		{
 			const soundArray = [];
-			soundArray.push("game/sounds/BeepBox-Song.mp3");
+			const path = "game/sounds";
+			soundArray.push(`${path}/BeepBox-Song.mp3`);
 
-			Object.keys(gameObjects).forEach(objectName =>
+			Loader.objectTypes.forEach(object =>
 			{
-				gameObjects[objectName].sounds.forEach(sound =>
+				if (!object.soundFiles) return;
+				object.soundFiles.forEach(sound =>
 				{
-					soundArray.push(sound);
+					soundArray.push(`${path}/${sound}`);
 				});
 			});
 
@@ -87,6 +89,7 @@ class Loader
 		GameData.onCreate();
 		Loader.objectTypes.forEach(object =>
 		{
+			console.log(`creating ${object.name}`);
 			object.create();
 		});
 

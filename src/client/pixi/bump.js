@@ -26,7 +26,7 @@ class Bump
 				if (sprite.gx === undefined)
 				{
 					Object.defineProperty(sprite, "gx", {
-						get () {return sprite.x;},
+						get () {return sprite.x + sprite.radius;},
 						enumerable: true, configurable: true
 					});
 				}
@@ -35,7 +35,7 @@ class Bump
 				if (sprite.gy === undefined)
 				{
 					Object.defineProperty(sprite, "gy", {
-						get () {return sprite.y;},
+						get () {return sprite.y + sprite.radius;},
 						enumerable: true, configurable: true
 					});
 				}
@@ -44,7 +44,7 @@ class Bump
 				if (sprite.centerX === undefined)
 				{
 					Object.defineProperty(sprite, "centerX", {
-						get () {return sprite.x;},
+						get () {return sprite.x + sprite.radius;},
 						enumerable: true, configurable: true
 					});
 				}
@@ -53,7 +53,7 @@ class Bump
 				if (sprite.centerY === undefined)
 				{
 					Object.defineProperty(sprite, "centerY", {
-						get () {return sprite.y;},
+						get () {return sprite.y + sprite.radius;},
 						enumerable: true, configurable: true
 					});
 				}
@@ -95,6 +95,30 @@ class Bump
 						get ()
 						{
 							return 0;
+						},
+						enumerable: true, configurable: true
+					});
+				}
+
+				//height
+				if (sprite.height === undefined)
+				{
+					Object.defineProperty(sprite, "height", {
+						get ()
+						{
+							return sprite.radius * 2;
+						},
+						enumerable: true, configurable: true
+					});
+				}
+
+				//width
+				if (sprite.width === undefined)
+				{
+					Object.defineProperty(sprite, "width", {
+						get ()
+						{
+							return sprite.radius * 2;
 						},
 						enumerable: true, configurable: true
 					});
@@ -377,9 +401,8 @@ class Bump
 	The sprites can contain an optional mass property that should be greater than 1.
 	*/
 
-	circleCollision (c1, c2, bounce = false, global = false)
+	circleCollision (c1, c2, bounce = false, global = false, moveObject = false)
 	{
-
 		//Add collision properties
 		if (!c1._bumpPropertiesAdded) this.addCollisionProperties(c1);
 		if (!c2._bumpPropertiesAdded) this.addCollisionProperties(c2);
@@ -393,13 +416,13 @@ class Bump
 		if (global)
 		{
 			//Use global coordinates
-			vx = (c2.gx + (c2.width / 2) - c2.xAnchorOffset) - (c1.gx + (c1.width / 2) - c1.xAnchorOffset);
-			vy = (c2.gy + (c2.width / 2) - c2.yAnchorOffset) - (c1.gy + (c1.width / 2) - c1.yAnchorOffset);
+			vx = (c2.gx + (c2.radius) - c2.xAnchorOffset) - (c1.gx + (c1.radius) - c1.xAnchorOffset);
+			vy = (c2.gy + (c2.radius) - c2.yAnchorOffset) - (c1.gy + (c1.radius) - c1.yAnchorOffset);
 		} else
 		{
 			//Use local coordinates
-			vx = (c2.x + (c2.width / 2) - c2.xAnchorOffset) - (c1.x + (c1.width / 2) - c1.xAnchorOffset);
-			vy = (c2.y + (c2.width / 2) - c2.yAnchorOffset) - (c1.y + (c1.width / 2) - c1.yAnchorOffset);
+			vx = (c2.x + (c2.radius) - c2.xAnchorOffset) - (c1.x + (c1.radius) - c1.xAnchorOffset);
+			vy = (c2.y + (c2.radius) - c2.yAnchorOffset) - (c1.y + (c1.radius) - c1.yAnchorOffset);
 		}
 
 		//Find the distance between the circles by calculating
@@ -436,8 +459,15 @@ class Bump
 			//Move circle 1 out of the collision by multiplying
 			//the overlap with the normalized vector and subtract it from
 			//circle 1's position
-			c1.x -= overlap * dx;
-			c1.y -= overlap * dy;
+			if (moveObject)
+			{
+				moveObject.x += overlap * dx;
+				moveObject.y += overlap * dy;
+			} else
+			{
+				c1.x -= overlap * dx;
+				c1.y -= overlap * dy;
+			}
 
 			//Bounce
 			if (bounce)
@@ -449,7 +479,7 @@ class Bump
 				s.y = -vx;
 
 				//Bounce c1 off the surface
-				this.bounceOffSurface(c1, s);
+				this.bounceOffSurface(c1, s, moveObject);
 			}
 		}
 		return hit;
@@ -1013,10 +1043,11 @@ class Bump
 	*/
 
 	circleRectangleCollision (
-		c1, r1, bounce = false, global = false
+		c1, r1, bounce = false, global = false, moveSquare = false
 	)
 	{
 
+		// console.log(`here ${c1.radius}, ${r1.radius}`);
 		//Add collision properties
 		if (!r1._bumpPropertiesAdded) this.addCollisionProperties(r1);
 		if (!c1._bumpPropertiesAdded) this.addCollisionProperties(c1);
@@ -1026,14 +1057,14 @@ class Bump
 		//Use either the global or local coordinates
 		if (global)
 		{
-			c1x = c1.gx;
-			c1y = c1.gy;
+			c1x = c1.gx + c1.radius;
+			c1y = c1.gy + c1.radius;
 			r1x = r1.gx;
 			r1y = r1.gy;
 		} else
 		{
-			c1x = c1.x;
-			c1y = c1.y;
+			c1x = c1.x + c1.radius;
+			c1y = c1.y + c1.radius;
 			r1x = r1.x;
 			r1y = r1.y;
 		}
@@ -1088,13 +1119,22 @@ class Bump
 			}
 		}
 
+		// if (temp > 60)
+		// {
+		// 	console.log(region);
+		// 	temp = 0;
+		// }
+		// temp++;
+
 		//Is this the circle touching the flat sides
 		//of the rectangle?
 		if (region === "topMiddle" || region === "bottomMiddle" || region === "leftMiddle" || region === "rightMiddle")
 		{
-
 			//Yes, it is, so do a standard rectangle vs. rectangle collision test
-			collision = this.rectangleCollision(c1, r1, bounce, global);
+			if (moveSquare)
+				collision = this.rectangleCollision(r1, c1, bounce, global);
+			else
+				collision = this.rectangleCollision(c1, r1, bounce, global);
 		}
 
 		//The circle is touching one of the corners, so do a
@@ -1126,7 +1166,12 @@ class Bump
 			}
 
 			//Check for a collision between the circle and the point
-			collision = this.circlePointCollision(c1, point, bounce, global);
+			if (moveSquare)
+			{
+				collision = this.circlePointCollision(c1, point, bounce, global, r1);
+			}
+			else
+				collision = this.circlePointCollision(c1, point, bounce, global);
 		}
 
 		if (collision)
@@ -1147,7 +1192,7 @@ class Bump
 	b. A point object with `x` and `y` properties.
 	*/
 
-	circlePointCollision (c1, point, bounce = false, global = false)
+	circlePointCollision (c1, point, bounce = false, global = false, moveObject = false)
 	{
 
 		//Add collision properties
@@ -1167,7 +1212,8 @@ class Bump
 		point.xAnchorOffset = 0;
 		point.yAnchorOffset = 0;
 		point._bumpPropertiesAdded = true;
-		return this.circleCollision(c1, point, bounce, global);
+
+		return this.circleCollision(c1, point, bounce, global, moveObject);
 	}
 
 	/*
@@ -1183,7 +1229,7 @@ class Bump
 	be used to dampen the bounce effect.
 	*/
 
-	bounceOffSurface (o, s)
+	bounceOffSurface (o, s, moveObject = false)
 	{
 
 		//Add collision properties
@@ -1194,6 +1240,7 @@ class Bump
 			p2 = {},
 			bounce = {},
 			mass = o.mass || 1;
+
 
 		//1. Calculate the collision surface's properties
 		//Find the surface vector's left normal
@@ -1207,6 +1254,16 @@ class Bump
 		s.dx = s.x / s.magnitude;
 		s.dy = s.y / s.magnitude;
 
+		if (moveObject)
+		{
+			moveObject.vx /= (o.absorbtion - 1) * Math.abs(s.dy) + 1;
+			moveObject.vy /= (o.absorbtion - 1) * Math.abs(s.dx) + 1;
+		} else
+		{
+			o.vx /= (o.absorbtion - 1) * Math.abs(s.dy) + 1;
+			o.vy /= (o.absorbtion - 1) * Math.abs(s.dx) + 1;
+			// console.log(`${(o.absorbtion - 1) * Math.abs(s.dy) + 1}, ${(o.absorbtion - 1) * Math.abs(s.dx) + 1}`);
+		}
 		//2. Bounce the object (o) off the surface (s)
 
 		//Find the dot product between the object and the surface
@@ -1227,14 +1284,28 @@ class Bump
 		p2.vx *= -1;
 		p2.vy *= -1;
 
+
 		//Add up the projections to create a new bounce vector
 		bounce.x = p1.vx + p2.vx;
 		bounce.y = p1.vy + p2.vy;
 
 		//Assign the bounce vector to the object's velocity
 		//with optional mass to dampen the effect
-		o.vx = bounce.x / mass;
-		o.vy = bounce.y / mass;
+		// if (frame == 60)
+		// console.log(`${s.dx}, ${s.dy}`);
+		if (moveObject)
+		{
+			moveObject.vx = -bounce.x / mass;
+			// moveObject.vx /= moveObject.absorbtion * Math.abs(s.dy);
+			moveObject.vy = -bounce.y / mass;
+			// moveObject.vy /= moveObject.absorbtion * Math.abs(s.dx);
+		} else
+		{
+			o.vx = bounce.x / mass;
+			// o.vx /= o.absorbtion * Math.abs(s.dy);
+			o.vy = bounce.y / mass;
+			// o.vy /= o.absorbtion * Math.abs(s.dx);
+		}
 	}
 
 	/*
@@ -1510,7 +1581,10 @@ class Bump
 
 	hit (a, b, react = false, bounce = false, global, extra = undefined)
 	{
-
+		if (!(a instanceof Array) && a.static && react)
+		{
+			return;
+		};
 		//Local references to bump's collision methods
 		let hitTestPoint = this.hitTestPoint.bind(this),
 			hitTestRectangle = this.hitTestRectangle.bind(this),
@@ -1563,7 +1637,7 @@ class Bump
 				} else if (!a.radius && b.radius)
 				{
 					//The second one is a circle and the first is a rectangle
-					return circleVsRectangle(b, a);
+					return rectangleVsCircle(a, b);
 				} else
 				{
 					//They're rectangles
@@ -1648,6 +1722,19 @@ class Bump
 			} else
 			{
 				return circleRectangleCollision(a, b, bounce, global);
+			}
+		}
+
+		function rectangleVsCircle (a, b)
+		{
+			//If the rectangles shouldn't react to the collision, just
+			//test to see if they're touching
+			if (!react)
+			{
+				return hitTestCircleRectangle(b, a, global, true);
+			} else
+			{
+				return circleRectangleCollision(b, a, bounce, global, true);
 			}
 		}
 	}

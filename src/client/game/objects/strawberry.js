@@ -7,13 +7,18 @@ class Strawberry extends GameObject
 	walkLeft = keyboard("a");
 	walkDown = keyboard("s");
 	walkRight = keyboard("d");
+	toggleGravity = keyboard(" ");
 
 	speed = 0.2;
 	jumpHeight = 20;
 	gravity = 0.5;
-	// texture = "running";
+	gravityObjects = {planet: GameData.getObjectFromName("planet")};
+	applyGravity = true;
 
-	disableGravity = true;
+	followerOffset = {x: 0, y: -32};
+	rotation = 0;
+
+	disableGravity = false;
 	rect = {};
 	debugScreen;
 	constructor ()
@@ -24,12 +29,12 @@ class Strawberry extends GameObject
 		{
 			x: 96,
 			y: 96,
-			height: 80,
-			width: 80,
+			radius: 40,
 			applyPhisics: true,
-			absorbtion: 100,
+			// absorbtion: 100,
 			static: false,
-			drag: 0.05
+			bounce: false,
+			drag: 0.01
 		};
 		super(Strawberry.name, properties, GameData.getSprite(`jerryIdle.json`));
 
@@ -44,20 +49,21 @@ class Strawberry extends GameObject
 
 		const style = new PIXI.TextStyle({
 			fontSize: 12,
+			fill: "white",
 		});
 		this.debugScreen = new PIXI.Text(
 			`\ta: ${this.sprite.ax}, ${this.sprite.ay}\n
 			v: ${this.sprite.vx}, ${this.sprite.vy}\n
 			d: ${this.sprite.x}, ${this.sprite.y}`
 			, style);
-		this.debugScreen.anchor.y = 1;
-		this.debugScreen.x = 8;
-		this.debugScreen.y = window.innerHeight - 8;
-		app.stage.addChild(this.debugScreen);
+		this.debugScreen.x = -window.innerWidth / 2 + 32;
+		this.debugScreen.y = -window.innerHeight / 2 - 16;
+		viewport.addChild(this.debugScreen);
 	}
 
 	static onLoad ()
 	{
+		Strawberry.soundFiles.push("Boing.mp3");
 		super.onLoad(["runningJerry.json", "jerryIdle.json"]);
 	}
 
@@ -68,6 +74,12 @@ class Strawberry extends GameObject
 
 	walkSetup ()
 	{
+		this.toggleGravity.press = () =>
+		{
+			if (this.disableGravity) this.disableGravity = false;
+			else this.disableGravity = true;
+		};
+
 		this.walkUp.press = () =>
 		{
 			if (this.disableGravity)
@@ -78,18 +90,50 @@ class Strawberry extends GameObject
 			{
 				let validJump = false;
 				// const rect = new PIXI.Rectangle(this.sprite.hitBox.x, this.sprite.hitBox.y + this.sprite.hitBox.height, this.sprite.hitBox.width, 1);
-				const rect = new PIXI.Rectangle(this.x, this.y + this.height, this.width, 1);
+				// const rect = new PIXI.Rectangle(this.x, this.y + this.height, this.width, 1);
 
-				GameData.getObjectArrayFromName("block").forEach(block =>
+				const collisionCandidates = [];
+				const collisionIds = [];
+				this.collisionChunks.forEach((chunkId) =>
+				{
+					const objects = GameData.getObjectsInChunk(chunkId);
+
+					if (!objects)
+					{
+						return;
+					}
+
+					objects.forEach((objectId) =>
+					{
+						if (objectId != this.id && !collisionIds.includes(objectId))
+						{
+							collisionIds.push(objectId);
+							collisionCandidates.push(GameData.getObjectFromId(objectId));
+						}
+					});
+				});
+
+				// const hitBox = new PIXI.Circle(Math.round(this.x), Math.round(this.y), this.radius + 3);
+				// const hitBox = {x: Math.round(this.x + this.radius), y: Math.round(this.y + this.radius), radius: this.radius + 3};
+				const hitBox = {x: this.x, y: this.y + 10, radius: this.radius, isSprite: true, name: "hitBox"};
+				// GameData.getObjectArrayFromName("block").forEach(block =>
+				collisionCandidates.forEach(object =>
 				{
 					// if (bump.hitTestRectangle(rect, block.sprite.hitBox))
-					if (bump.hitTestRectangle(rect, block))
+					const hit = bump.hit(hitBox, object);
+					// console.log(hit);
+					if (hit)
 					{
 						validJump = true;
 					}
 				});
 				// if (validJump) this.sprite.vy += -this.jumpHeight;
-				if (validJump) this.vy += -this.jumpHeight;
+				if (validJump)
+				{
+					this.vy += -this.jumpHeight;
+					const boing = sounds["game/sounds/Boing.mp3"];
+					boing.play();
+				}
 			}
 		};
 
@@ -104,12 +148,14 @@ class Strawberry extends GameObject
 
 		this.walkLeft.press = () =>
 		{
-			this.ax += -this.speed;
+			this.ax += -this.speed * Math.cos(-this.rotation);
+			this.ay += -this.speed * Math.sin(-this.rotation);
 		};
 
 		this.walkLeft.release = () =>
 		{
 			this.ax = 0;
+			this.ay = 0;
 			if (this.walkRight.isDown) this.walkRight.press();
 		};
 
@@ -132,37 +178,51 @@ class Strawberry extends GameObject
 
 		this.walkRight.press = () =>
 		{
-			this.ax += this.speed;
+			this.ax += this.speed * Math.cos(-this.rotation);
+			this.ay += this.speed * Math.sin(-this.rotation);
 		};
 
 		this.walkRight.release = () =>
 		{
 			this.ax = 0;
+			this.ay = 0;
 			if (this.walkLeft.isDown) this.walkLeft.press();
 		};
 	}
 
 	step (delta)
 	{
-		viewport.removeChild(this.rect);
-		this.rect = new PIXI.Graphics();
-		this.rect.lineStyle(2, 0x00FF00, 1);
-		this.rect.drawRect(this.x, this.y, this.width, this.height);
-		this.rect.endFill();
-		// this.rect.x = this.sprite.x;
-		// this.rect.y = this.sprite.y;
-		viewport.addChild(this.rect);
+		super.step(delta);
 
-		// this.debugScreen.text =
-		// `a: ${Math.round(this.sprite.ax * 100) / 100}, ${Math.round(this.sprite.ay * 100) / 100}\n
-		// v: ${Math.round(this.sprite.vx * 100) / 100}, ${Math.round(this.sprite.vy * 100) / 100}\n
-		// d: ${Math.round(this.sprite.x * 100) / 100}, ${Math.round(this.sprite.y * 100) / 100}`;
+		const w = viewport.screenWidth;
+		const h = viewport.screenHeight;
+		const angle = Math.atan(h / w);
+		const rad = Math.sqrt(h * h + w * w) / 2;
+
+		this.followerOffset.x = -Math.cos(-this.rotation + angle) * rad + w / 2;
+		this.followerOffset.y = -Math.sin(-this.rotation + angle) * rad + h / 2;
+
+		GameData.getObjectFromName("follower").x = this.x + this.followerOffset.x;
+		GameData.getObjectFromName("follower").y = this.y + this.followerOffset.y;
+
+		app.stage.rotation = this.rotation;
+		this.sprite.rotation = - this.rotation;
+
+		// hitbox
+
+		// viewport.removeChild(this.rect);
+		// this.rect = new PIXI.Graphics();
+		// this.rect.lineStyle(2, 0x00FF00, 1);
+		// this.rect.drawCircle(this.x + this.radius, this.y + this.radius, this.radius);
+		// // this.rect.drawRect(this.x, this.y, this.width, this.height);
+		// this.rect.endFill();
+		// viewport.addChild(this.rect);
+
 		this.debugScreen.text =
 			`a: ${Math.round(this.ax * 100) / 100}, ${Math.round(this.ay * 100) / 100}\n
 			v: ${Math.round(this.vx * 100) / 100}, ${Math.round(this.vy * 100) / 100}\n
 			d: ${Math.round(this.x * 100) / 100}, ${Math.round(this.y * 100) / 100}`;
 
-		super.step(delta);
 
 		let sign = Math.sign(this.vx);
 		sign == 0 ? sign = 1 : "";
@@ -177,6 +237,25 @@ class Strawberry extends GameObject
 			this.image = "runningJerry.json";
 		}
 		this.sprite.scale.x = sign;
+		this.debugScreen.rotation = -this.rotation;
+		// this.debugScreen.scale.x = sign;
+
+		// if (sign == 1)
+		// {
+		// 	this.debugScreen.scale.x = 1;
+		// this.debugScreen.x = -window.innerWidth / 2 + 32;
+		// }
+		// else if (sign == -1)
+		// {
+		// 	this.debugScreen.scale.x = -1;
+		// this.debugScreen.x = window.innerWidth / 2 - 32;
+		// }
+
+		this.debugScreen.x = viewport.corner.x;
+		this.debugScreen.y = viewport.corner.y;
+		// this.debugScreen.position.set(viewport.corner);
+
+		// collisionChunks
 
 		// this.collisionChunks.forEach((chunk) =>
 		// {
@@ -199,7 +278,7 @@ class Strawberry extends GameObject
 
 				if (!objects)
 				{
-					this.ay = this.gravity;
+					// this.ay = this.gravity;
 					return;
 				}
 
@@ -207,35 +286,80 @@ class Strawberry extends GameObject
 				{
 					if (objectId != this.id)
 					{
-						collisionCandidates.push(GameData.getObjectFromId(objectId).sprite);
+						collisionCandidates.push(GameData.getObjectFromId(objectId));
 					}
 				});
 			});
 
 			let isFloating = true;
 
-			const hitBox = new PIXI.Rectangle(Math.round(this.x), Math.round(this.y + this.height), this.width, 1);
-			// const hitBox = new PIXI.Rectangle(Math.round(this.sprite.hitBox.x), Math.round(this.sprite.hitBox.y + this.sprite.hitBox.height), this.sprite.hitBox.width, 1);
+			// const hitBox = new PIXI.Circle(Math.round(this.x), Math.round(this.y), this.radius + 5);
+			const hitBox = {x: this.x, y: this.y, radius: this.radius + 1, isSprite: true, name: "hitBox"};
 
 			collisionCandidates.forEach(object =>
 			{
-				if (bump.hitTestRectangle(hitBox, object))
+				if (bump.hit(hitBox, object))
 				{
 					isFloating = false;
 				}
 			});
 
+			this.applyGravity = isFloating;
+
+			// jump
+
 			// viewport.removeChild(this.rect);
 			// this.rect = new PIXI.Graphics();
-			// this.rect.beginFill(0x00FF00);
-			// this.rect.drawRect(0, 0, this.sprite.width, 1);
-			// this.rect.endFill();
-			// this.rect.x = Math.round(this.absX());
-			// this.rect.y = Math.round(this.absY() + this.sprite.height);
-			// viewport.addChild(this.rect);
-			// console.log(collisionCandidates.length);
+			// this.rect.lineStyle(4, 0x00FF00, 1);
 
-			this.ay = this.gravity * isFloating;
+			// this.rect.drawCircle(Math.round(this.x + this.radius), Math.round(this.y + this.radius), this.radius + 1);
+
+			// this.rect.endFill();
+			// viewport.addChild(this.rect);
+
+			this.setGravity();
+
+		} else {this.rotation = 0;}
+	}
+
+	setGravity ()
+	{
+		const relPos = {};
+
+		relPos.x = this.gravityObjects["planet"].centerX - this.centerX;
+		relPos.y = this.gravityObjects["planet"].centerY - this.centerY;
+
+		const distance = Math.sqrt(relPos.x * relPos.x + relPos.y * relPos.y);
+
+		const gravityConstant = 10;
+		const gravForce = (gravityConstant * this.gravityObjects["planet"].mass * this.mass) / Math.pow(distance, 2);
+
+		const dx = relPos.x / distance;
+		const dy = relPos.y / distance;
+
+		const gravX = gravForce * dx;
+		const gravY = gravForce * dy;
+
+		if (relPos.y > 0)
+			this.rotation = Math.atan(relPos.x / relPos.y);
+		else if (relPos.y < 0)
+			this.rotation = Math.atan(relPos.x / relPos.y) + Math.PI;
+
+		if (this.applyGravity)
+		{
+			Object.keys(this.gravityObjects).forEach(objectName =>
+			{
+
+				this.forces.x[objectName + "Gravity"] = gravX;
+				this.forces.y[objectName + "Gravity"] = gravY;
+			});
+		} else
+		{
+			Object.keys(this.gravityObjects).forEach(objectName =>
+			{
+				this.forces.x[objectName + "Gravity"] = 0;
+				this.forces.y[objectName + "Gravity"] = 0;
+			});
 		}
 	}
 }

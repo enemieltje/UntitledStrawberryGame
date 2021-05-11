@@ -15,8 +15,10 @@ class Background extends GameObject
 	{
 		gameObjects.background = [];
 
-		const width = viewport.worldWidth / 64;
-		const height = viewport.worldHeight / 64;
+		// const width = viewport.worldWidth / 64;
+		// const height = viewport.worldHeight / 64;
+		const width = 32;
+		const height = 32;
 
 		for (let y = 0; y < height; y++)
 		{
