@@ -37,7 +37,8 @@ class Strawberry extends GameObject
 		super(Strawberry.name, properties, GameData.getSprite(`jerryIdle.json`));
 
 		this.sprite.animationSpeed = 0.2;
-		this.sprite.anchor.set(0.5);
+		this.sprite.anchor.x = 0.52;
+		// this.sprite.anchor.set(0.5);
 		this.walkSetup();
 
 		const style = new PIXI.TextStyle({
@@ -45,6 +46,10 @@ class Strawberry extends GameObject
 			fill: "white",
 		});
 		this.debugScreen = new PIXI.Text("", style);
+	}
+
+	drawDebugScreen ()
+	{
 		viewport.addChild(this.debugScreen);
 	}
 
@@ -61,6 +66,7 @@ class Strawberry extends GameObject
 
 	walkSetup ()
 	{
+		this.relForces.walk = {x: 0, y: 0};
 		this.toggleGravity.press = () =>
 		{
 			if (this.disableGravity) this.disableGravity = false;
@@ -71,7 +77,8 @@ class Strawberry extends GameObject
 		{
 			if (this.disableGravity)
 			{
-				this.relAy += -this.speed;
+				this.relForces.walk.y += -this.speed;
+				// this.relAy += -this.speed;
 			} else
 			{
 				if (!this.isFloating)
@@ -86,19 +93,22 @@ class Strawberry extends GameObject
 		{
 			if (this.disableGravity)
 			{
-				this.relAy = 0;
+				this.relForces.walk.y = 0;
+				// this.relAy = 0;
 				if (this.walkDown.isDown) this.walkDown.press();
 			}
 		};
 
 		this.walkLeft.press = () =>
 		{
-			this.relAx += -this.speed;
+			this.relForces.walk.x += -this.speed;
+			// this.relAx += -this.speed;
 		};
 
 		this.walkLeft.release = () =>
 		{
-			this.relAx = 0;
+			this.relForces.walk.x = 0;
+			// this.relAx = 0;
 			if (this.walkRight.isDown) this.walkRight.press();
 		};
 
@@ -106,7 +116,8 @@ class Strawberry extends GameObject
 		{
 			if (this.disableGravity)
 			{
-				this.relAy += this.speed;
+				this.relForces.walk.y += this.speed;
+				// this.relAy += this.speed;
 			}
 		};
 
@@ -114,19 +125,22 @@ class Strawberry extends GameObject
 		{
 			if (this.disableGravity)
 			{
-				this.relAy = 0;
+				this.relForces.walk.y = 0;
+				// this.relAy = 0;
 				if (this.walkUp.isDown) this.walkUp.press();
 			}
 		};
 
 		this.walkRight.press = () =>
 		{
-			this.relAx += this.speed;
+			this.relForces.walk.x += this.speed;
+			// this.relAx += this.speed;
 		};
 
 		this.walkRight.release = () =>
 		{
-			this.relAx = 0;
+			this.relForces.walk.x = 0;
+			// this.relAx = 0;
 			if (this.walkLeft.isDown) this.walkLeft.press();
 		};
 	}
@@ -137,30 +151,53 @@ class Strawberry extends GameObject
 		super.step(delta);
 		this.checkFloating();
 
-		const w = viewport.screenWidthInWorldPixels;
-		const h = viewport.screenHeightInWorldPixels;
-		const angle = Math.atan(h / w);
-		const rad = Math.sqrt(h * h + w * w) / 2;
+		const pos = new Complex(this.x, this.y);
 
-		this.followerOffset.x = -Math.cos(this.rotation + angle) * rad + w / 2;
-		this.followerOffset.y = -Math.sin(this.rotation + angle) * rad + h / 2;
+		const camCenter = new Complex(
+			viewport.screenWidthInWorldPixels / 2,
+			viewport.screenHeightInWorldPixels / 2);
 
-		GameData.getObjectFromName("follower").x = this.x + this.followerOffset.x;
-		GameData.getObjectFromName("follower").y = this.y + this.followerOffset.y;
+		this.followerOffset = pos.add(camCenter.neg().mul(this.rotation).add(camCenter));
+
+		GameData.getObjectFromName("follower").x = this.followerOffset.re;
+		GameData.getObjectFromName("follower").y = this.followerOffset.im;
+
+		// const w = viewport.screenWidthInWorldPixels;
+		// const h = viewport.screenHeightInWorldPixels;
+
+		// const angle = Math.atan(h / w);
+		// const rad = Math.sqrt(h * h + w * w) / 2;
+
+		// this.followerOffset.x = -Math.cos(this.rotation + angle) * rad + w / 2;
+		// this.followerOffset.y = -Math.sin(this.rotation + angle) * rad + h / 2;
+
+		// GameData.getObjectFromName("follower").x = this.x + this.followerOffset.x;
+		// GameData.getObjectFromName("follower").y = this.y + this.followerOffset.y;
+
 		if (!this.disableGravity)
 		{
-			const relPos = {};
+			const relPos = new Complex(
+				this.gravityObjects["planet"].centerX - this.centerX,
+				this.gravityObjects["planet"].centerY - this.centerY);
 
-			relPos.x = this.gravityObjects["planet"].centerX - this.centerX;
-			relPos.y = this.gravityObjects["planet"].centerY - this.centerY;
+			this.rotation = new Complex({arg: relPos.arg(), abs: 1})
+				.mul(Complex.I.neg());
 
-			if (relPos.y > 0)
-				this.rotation = -Math.atan(relPos.x / relPos.y);
-			else if (relPos.y < 0)
-				this.rotation = -Math.atan(relPos.x / relPos.y) + Math.PI;
-		} else this.rotation = 0;
+			// const relPos = {};
 
-		app.stage.rotation = -this.rotation;
+			// relPos.x = this.gravityObjects["planet"].centerX - this.centerX;
+			// relPos.y = this.gravityObjects["planet"].centerY - this.centerY;
+
+			// if (relPos.y > 0)
+			// {
+			// 	this.rotation = -Math.atan(relPos.x / relPos.y);
+			// }
+			// else if (relPos.y < 0)
+			// 	this.rotation = -Math.atan(relPos.x / relPos.y) + Math.PI;
+
+		} else this.rotation = Complex.ONE;
+
+		app.stage.rotation = -this.rotation.arg();
 
 		function round (number)
 		{
@@ -185,11 +222,14 @@ class Strawberry extends GameObject
 			total += value;
 		});
 
+		const absA = this.getAbsA();
+		const relA = this.getRelA();
+
 		this.debugScreen.text = `
 			fps: ${round(total / avgAmount)}\n
-			relA: ${round(this.relAx)}, ${round(this.relAy)}\n
+			relA: ${round(relA.re)}, ${round(relA.im)}\n
 			relV: ${round(this.relVx)}, ${round(this.relVy)}\n
-			a: ${round(this.ax + resultAx)}, ${round(this.ay + resultAy)} \n
+			a: ${round(absA.re)}, ${round(absA.im)} \n
 			v: ${round(this.vx)}, ${round(this.vy)}\n
 			d: ${round(this.x)}, ${round(this.y)}`;
 
@@ -209,23 +249,23 @@ class Strawberry extends GameObject
 		sign == 0 ? sign = 1 : "";
 
 		this.sprite.scale.x = sign;
-		this.debugScreen.rotation = this.rotation;
 
+		this.debugScreen.rotation = this.rotation.arg();
 		this.debugScreen.x = viewport.corner.x;
 		this.debugScreen.y = viewport.corner.y;
 
-		if (!this.disableGravity)
-		{
-			this.setGravity();
-		} else
-		{
-			Object.keys(this.gravityObjects).forEach(objectName =>
-			{
-				this.forces.x[objectName + "Gravity"] = 0;
-				this.forces.y[objectName + "Gravity"] = 0;
-			});
-			this.rotation = 0;
-		}
+		// if (!this.disableGravity)
+		// {
+		this.setGravity();
+		// } else
+		// {
+		// 	Object.keys(this.gravityObjects).forEach(objectName =>
+		// 	{
+		// 		this.forces.x[objectName + "Gravity"] = 0;
+		// 		this.forces.y[objectName + "Gravity"] = 0;
+		// 	});
+		// 	this.rotation = Complex.ONE;
+		// }
 
 		const follower = GameData.getObjectFromName("follower");
 		this.addDebugShape("follower", "circle", {
@@ -240,6 +280,18 @@ class Strawberry extends GameObject
 			radius: this.radius
 		}, 0x00FF00);
 
+		this.addDebugShape("coords", "circle", {
+			x: this.x,
+			y: this.y,
+			radius: 3
+		}, 0x00FF00);
+
+		this.addDebugShape("spritePos", "circle", {
+			x: this.sprite.x,
+			y: this.sprite.y,
+			radius: 3
+		}, 0x00FFFF);
+
 		this.debugShapes.collisionChunks = {};
 		this.debugShapes.collisionChunks.shape = new PIXI.Graphics();
 		this.debugShapes.collisionChunks.shape.lineStyle(4, 0xFF33FF, 1);
@@ -253,7 +305,9 @@ class Strawberry extends GameObject
 		});
 		this.debugShapes.collisionChunks.shape.endFill();
 
+		this.debugShapes.coords.enabled = true;
 		this.debugShapes.hitbox.enabled = true;
+		this.debugShapes.spritePos.enabled = true;
 		this.debugShapes.follower.enabled = true;
 		this.debugShapes.isFloating.enabled = true;
 		this.debugShapes.collisionChunks.enabled = true;
@@ -321,35 +375,47 @@ class Strawberry extends GameObject
 
 	setGravity ()
 	{
-		if (this.isFloating)
+		if (this.isFloating && !this.disableGravity)
 		{
 			Object.keys(this.gravityObjects).forEach(objectName =>
 			{
-				const relPos = {};
+				const thisCenter = new Complex(this.centerX, this.centerY);
+				const gravityCenter = new Complex(
+					this.gravityObjects[objectName].centerX,
+					this.gravityObjects[objectName].centerY);
 
-				relPos.x = this.gravityObjects[objectName].centerX - this.centerX;
-				relPos.y = this.gravityObjects[objectName].centerY - this.centerY;
+				const distance = gravityCenter.sub(thisCenter).abs();
+				const gravForce = (this.gravityObjects["planet"].mass * this.mass) / Math.pow(distance, 2);
 
-				const distance = Math.sqrt(relPos.x * relPos.x + relPos.y * relPos.y);
+				this.relForces[objectName + "Gravity"] = {x: 0, y: gravForce};
 
-				const gravityConstant = 1;
-				const gravForce = (gravityConstant * this.gravityObjects["planet"].mass * this.mass) / Math.pow(distance, 2);
+				// const relPos = {};
 
-				const dx = relPos.x / distance;
-				const dy = relPos.y / distance;
+				// relPos.x = this.gravityObjects[objectName].centerX - this.centerX;
+				// relPos.y = this.gravityObjects[objectName].centerY - this.centerY;
 
-				const gravX = gravForce * dx;
-				const gravY = gravForce * dy;
+				// const distance = Math.sqrt(relPos.x * relPos.x + relPos.y * relPos.y);
 
-				this.forces.x[objectName + "Gravity"] = gravX;
-				this.forces.y[objectName + "Gravity"] = gravY;
+				// const gravityConstant = 1;
+				// const gravForce = (gravityConstant * this.gravityObjects["planet"].mass * this.mass) / Math.pow(distance, 2);
+
+				// const dx = relPos.x / distance;
+				// const dy = relPos.y / distance;
+
+				// const gravX = gravForce * dx;
+				// const gravY = gravForce * dy;
+
+				// this.forces.x[objectName + "Gravity"] = gravX;
+				// this.forces.y[objectName + "Gravity"] = gravY;
 			});
 		} else
 		{
 			Object.keys(this.gravityObjects).forEach(objectName =>
 			{
-				this.forces.x[objectName + "Gravity"] = 0;
-				this.forces.y[objectName + "Gravity"] = 0;
+				this.relForces[objectName + "Gravity"] = {x: 0, y: 0};
+
+				// this.forces.x[objectName + "Gravity"] = 0;
+				// this.forces.y[objectName + "Gravity"] = 0;
 			});
 		}
 	}

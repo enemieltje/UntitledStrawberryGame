@@ -13,14 +13,15 @@ class GameObject
 	collisionChunks = [];
 
 	spriteOffset = {x: 0, y: 0};
-	rotation = 0;
+	rotation = Complex.ONE;
 	x = 0;
 	y = 0;
 	vx = 0;
 	vy = 0;
 	ax = 0;
 	ay = 0;
-	forces = {x: {}, y: {}};
+	relForces = {};
+	forces = {};
 	absorbtion = 1;
 	bounce = true;
 	static = true;
@@ -115,9 +116,27 @@ class GameObject
 				this.centerY = this.y + this.height / 2;
 			}
 
-			this.sprite.x = this.x + this.sprite.anchor.x * this.sprite.width + this.spriteOffset.x;
-			this.sprite.y = this.y + this.sprite.anchor.y * this.sprite.height + this.spriteOffset.y;
-			this.sprite.rotation = this.rotation;
+			const absPos = new Complex(
+				this.x,
+				this.y);
+
+			const anchor = new Complex(
+				this.sprite.anchor.x * (this.sprite.radius * 2 || this.sprite.width),
+				this.sprite.anchor.y * (this.sprite.radius * 2 || this.sprite.height));
+
+			const offset = new Complex(this.spriteOffset.x, this.spriteOffset.y);
+
+			const center = new Complex(this.centerX - this.x, this.centerY - this.y);
+
+			const spritePos = anchor.add(offset).sub(center).mul(this.rotation).add(center).add(absPos);
+
+			this.sprite.x = spritePos.re;
+			this.sprite.y = spritePos.im;
+
+			// this.sprite.x = this.x + this.sprite.anchor.x * (this.sprite.radius * 2 || this.sprite.width) + this.spriteOffset.x;
+			// this.sprite.y = this.y + this.sprite.anchor.y * (this.sprite.radius * 2 || this.sprite.height) + this.spriteOffset.y;
+
+			this.sprite.rotation = this.rotation.arg();
 		}
 	}
 
@@ -128,25 +147,30 @@ class GameObject
 		this.vx -= this.drag * this.vx * delta;
 		this.vy -= this.drag * this.vy * delta;
 
-		Object.keys(this.forces.x).forEach(forceXName =>
+		Object.keys(this.forces).forEach(forceName =>
 		{
-			this.vx += this.forces.x[forceXName] * delta;
+			this.vx += this.forces[forceName].x * delta;
+			this.vy += this.forces[forceName].y * delta;
 		});
 
-		Object.keys(this.forces.y).forEach(forceYName =>
+		Object.keys(this.relForces).forEach(forceName =>
 		{
-			this.vy += this.forces.y[forceYName] * delta;
+			const relF = this.relForces[forceName];
+			const absF = new Complex(relF.x, relF.y).mul(this.rotation).div(this.mass);
+
+			this.vx += absF.re * delta;
+			this.vy += absF.im * delta;
 		});
 
-		let resultAx = 0, resultAy = 0;
+		// let resultAx = 0, resultAy = 0;
 
 		// resultAx += this.relAx * Math.cos(this.rotation);
 		// resultAx += this.relAy * Math.sin(this.rotation);
 		// resultAy += this.relAx * Math.sin(this.rotation);
 		// resultAy += this.relAy * Math.cos(this.rotation);
 
-		this.vx += (this.ax + resultAx) * delta;
-		this.vy += (this.ay + resultAy) * delta;
+		this.vx += this.ax * delta;
+		this.vy += this.ay * delta;
 
 		this.x += this.vx * delta;
 		this.y += this.vy * delta;
@@ -261,24 +285,36 @@ class GameObject
 
 	set relAx (relAx)
 	{
-		this.ax = relAx * Math.cos(this.rotation) + this.relAx * Math.sin(this.rotation);
-		this.ay = relAx * Math.sin(this.rotation) + this.relAy * Math.cos(this.rotation);
+		const absA = new Complex(relAx, this.relAy).mul(this.rotation);
+		this.ax = absA.re;
+		this.ay = absA.im;
+
+		// this.ax = relAx * Math.cos(this.rotation) + this.relAx * Math.sin(this.rotation);
+		// this.ay = relAx * Math.sin(this.rotation) + this.relAy * Math.cos(this.rotation);
 	}
 
 	get relAx ()
 	{
-		return this.ax * Math.cos(this.rotation) + this.ay * Math.sin(this.rotation);
+		return new Complex(this.ax, this.ay).div(this.rotation).re;
+
+		// return this.ax * Math.cos(this.rotation) + this.ay * Math.sin(this.rotation);
 	}
 
 	set relAy (relAy)
 	{
-		this.ax = relAy * Math.sin(this.rotation) + this.relAx * Math.cos(this.rotation);
-		this.ay = relAy * Math.cos(this.rotation) + this.relAy * Math.sin(this.rotation);
+		const absA = new Complex(this.relAx, relAy).mul(this.rotation);
+		this.ax = absA.re;
+		this.ay = absA.im;
+
+		// this.ax = relAy * Math.sin(this.rotation) + this.relAx * Math.cos(this.rotation);
+		// this.ay = relAy * Math.cos(this.rotation) + this.relAy * Math.sin(this.rotation);
 	}
 
 	get relAy ()
 	{
-		return this.ax * Math.sin(this.rotation) + this.ay * Math.cos(this.rotation);
+		return new Complex(this.ax, this.ay).div(this.rotation).im;
+
+		// return this.ax * Math.sin(this.rotation) + this.ay * Math.cos(this.rotation);
 	}
 
 
@@ -286,24 +322,78 @@ class GameObject
 
 	set relVx (relVx)
 	{
-		this.vx = relVx * Math.cos(this.rotation) + this.relVx * Math.sin(this.rotation);
-		this.vy = relVx * Math.sin(this.rotation) + this.relVx * Math.cos(this.rotation);
+		const absV = new Complex(relVx, this.relVy).mul(this.rotation);
+		this.vx = absV.re;
+		this.vy = absV.im;
+
+		// this.vx = relVx * Math.cos(this.rotation) + this.relVx * Math.sin(this.rotation);
+		// this.vy = relVx * Math.sin(this.rotation) + this.relVx * Math.cos(this.rotation);
 	}
 
 	get relVx ()
 	{
-		return this.vx * Math.cos(this.rotation) + this.vy * Math.sin(this.rotation);
+		return new Complex(this.vx, this.vy).div(this.rotation).re;
+
+		// return this.vx * Math.cos(this.rotation) + this.vy * Math.sin(this.rotation);
 	}
 
 	set relVy (relVy)
 	{
-		this.vx = relVy * Math.sin(this.rotation) + this.relVx * Math.cos(this.rotation);
-		this.vy = relVy * Math.cos(this.rotation) + this.relVx * Math.sin(this.rotation);
+		const absV = new Complex(this.relVx, relVy).mul(this.rotation);
+		this.vx = absV.re;
+		this.vy = absV.im;
+
+		// this.vx = relVy * Math.sin(this.rotation) + this.relVx * Math.cos(this.rotation);
+		// this.vy = relVy * Math.cos(this.rotation) + this.relVx * Math.sin(this.rotation);
 	}
 
 	get relVy ()
 	{
-		return this.vx * Math.sin(this.rotation) + this.vy * Math.cos(this.rotation);
+		return new Complex(this.vx, this.vy).div(this.rotation).im;
+
+		// return this.vx * Math.sin(this.rotation) + this.vy * Math.cos(this.rotation);
+	}
+
+	getAbsA ()
+	{
+		let a = new Complex(this.ax, this.ay);
+
+		Object.keys(this.forces).forEach(forceName =>
+		{
+			const absF = this.relForces[forceName];
+			const absA = new Complex(absF.x, absF.y);
+			a = a.add(absA);
+		});
+
+		Object.keys(this.relForces).forEach(forceName =>
+		{
+			const relF = this.relForces[forceName];
+			const absA = new Complex(relF.x, relF.y).mul(this.rotation).div(this.mass);
+
+			a = a.add(absA);
+		});
+		return a;
+	}
+
+	getRelA ()
+	{
+		let a = new Complex(this.ax, this.ay);
+
+		Object.keys(this.forces).forEach(forceName =>
+		{
+			const absF = this.relForces[forceName];
+			const relA = new Complex(absF.x, absF.y).div(this.rotation).div(this.mass);
+			a = a.add(relA);
+		});
+
+		Object.keys(this.relForces).forEach(forceName =>
+		{
+			const relF = this.relForces[forceName];
+			const relA = new Complex(relF.x, relF.y).div(this.mass);
+
+			a = a.add(relA);
+		});
+		return a;
 	}
 
 	absX ()

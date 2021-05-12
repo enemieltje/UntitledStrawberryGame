@@ -114,6 +114,7 @@ function onStart ()
 	BeepBox.volume = 0.25;
 	sounds["game/sounds/Boing.mp3"].volume = 0.5;
 	GameData.getObjectFromName("planet").drawShape();
+	GameData.getObjectFromName("strawberry").drawDebugScreen();
 }
 
 function tick (delta)
