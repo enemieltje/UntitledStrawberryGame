@@ -2,6 +2,7 @@ class Strawberry extends GameObject
 {
 	static name = "strawberry";
 	static tileset = [];
+	static soundFiles = [];
 
 	walkUp = keyboard("w");
 	walkLeft = keyboard("a");
@@ -16,19 +17,19 @@ class Strawberry extends GameObject
 	applyGravity = true;
 	isFloating = true;
 
-	followerOffset = {x: 0, y: -32};
-
 	disableGravity = false;
 	fps = [];
 	debugShapes = {};
 	debugScreen;
+	debugText = [];
+
 	constructor ()
 	{
 		const properties =
 		{
 			x: 96,
 			y: 96,
-			radius: 40,
+			radius: 30,
 			applyPhisics: true,
 			static: false,
 			bounce: false,
@@ -38,7 +39,6 @@ class Strawberry extends GameObject
 
 		this.sprite.animationSpeed = 0.2;
 		this.sprite.anchor.x = 0.52;
-		// this.sprite.anchor.set(0.5);
 		this.walkSetup();
 
 		const style = new PIXI.TextStyle({
@@ -78,7 +78,6 @@ class Strawberry extends GameObject
 			if (this.disableGravity)
 			{
 				this.relForces.walk.y += -this.speed;
-				// this.relAy += -this.speed;
 			} else
 			{
 				if (!this.isFloating)
@@ -94,7 +93,6 @@ class Strawberry extends GameObject
 			if (this.disableGravity)
 			{
 				this.relForces.walk.y = 0;
-				// this.relAy = 0;
 				if (this.walkDown.isDown) this.walkDown.press();
 			}
 		};
@@ -102,13 +100,11 @@ class Strawberry extends GameObject
 		this.walkLeft.press = () =>
 		{
 			this.relForces.walk.x += -this.speed;
-			// this.relAx += -this.speed;
 		};
 
 		this.walkLeft.release = () =>
 		{
 			this.relForces.walk.x = 0;
-			// this.relAx = 0;
 			if (this.walkRight.isDown) this.walkRight.press();
 		};
 
@@ -117,7 +113,6 @@ class Strawberry extends GameObject
 			if (this.disableGravity)
 			{
 				this.relForces.walk.y += this.speed;
-				// this.relAy += this.speed;
 			}
 		};
 
@@ -126,7 +121,6 @@ class Strawberry extends GameObject
 			if (this.disableGravity)
 			{
 				this.relForces.walk.y = 0;
-				// this.relAy = 0;
 				if (this.walkUp.isDown) this.walkUp.press();
 			}
 		};
@@ -134,107 +128,36 @@ class Strawberry extends GameObject
 		this.walkRight.press = () =>
 		{
 			this.relForces.walk.x += this.speed;
-			// this.relAx += this.speed;
 		};
 
 		this.walkRight.release = () =>
 		{
 			this.relForces.walk.x = 0;
-			// this.relAx = 0;
 			if (this.walkLeft.isDown) this.walkLeft.press();
 		};
 	}
 
 	step (delta)
 	{
-		this.deleteDebugShapes();
 		super.step(delta);
+
+		this.deleteDebugShapes();
+
+		this.setRotation();
+		this.updateSprite();
+		this.updateViewport();
+
 		this.checkFloating();
+		this.setGravity();
 
-		const pos = new Complex(this.x, this.y);
+		this.setDebugScreen(delta);
 
-		const camCenter = new Complex(
-			viewport.screenWidthInWorldPixels / 2,
-			viewport.screenHeightInWorldPixels / 2);
+		this.updateDebugShapes();
+		this.drawDebugShapes();
+	}
 
-		this.followerOffset = pos.add(camCenter.neg().mul(this.rotation).add(camCenter));
-
-		GameData.getObjectFromName("follower").x = this.followerOffset.re;
-		GameData.getObjectFromName("follower").y = this.followerOffset.im;
-
-		// const w = viewport.screenWidthInWorldPixels;
-		// const h = viewport.screenHeightInWorldPixels;
-
-		// const angle = Math.atan(h / w);
-		// const rad = Math.sqrt(h * h + w * w) / 2;
-
-		// this.followerOffset.x = -Math.cos(this.rotation + angle) * rad + w / 2;
-		// this.followerOffset.y = -Math.sin(this.rotation + angle) * rad + h / 2;
-
-		// GameData.getObjectFromName("follower").x = this.x + this.followerOffset.x;
-		// GameData.getObjectFromName("follower").y = this.y + this.followerOffset.y;
-
-		if (!this.disableGravity)
-		{
-			const relPos = new Complex(
-				this.gravityObjects["planet"].centerX - this.centerX,
-				this.gravityObjects["planet"].centerY - this.centerY);
-
-			this.rotation = new Complex({arg: relPos.arg(), abs: 1})
-				.mul(Complex.I.neg());
-
-			// const relPos = {};
-
-			// relPos.x = this.gravityObjects["planet"].centerX - this.centerX;
-			// relPos.y = this.gravityObjects["planet"].centerY - this.centerY;
-
-			// if (relPos.y > 0)
-			// {
-			// 	this.rotation = -Math.atan(relPos.x / relPos.y);
-			// }
-			// else if (relPos.y < 0)
-			// 	this.rotation = -Math.atan(relPos.x / relPos.y) + Math.PI;
-
-		} else this.rotation = Complex.ONE;
-
-		app.stage.rotation = -this.rotation.arg();
-
-		function round (number)
-		{
-			return Math.round(number * 100) / 100;
-		}
-
-		let resultAx = 0, resultAy = 0;
-
-		// resultAx += this.relAx * Math.cos(this.rotation);
-		// resultAx += this.relAy * Math.sin(this.rotation);
-		// resultAy += this.relAx * Math.sin(this.rotation);
-		// resultAy += this.relAy * Math.cos(this.rotation);
-
-		const avgAmount = 10;
-		if (this.fps.length >= avgAmount)
-			this.fps.shift();
-		this.fps.push(60 * delta);
-
-		let total = 0;
-		this.fps.forEach((value) =>
-		{
-			total += value;
-		});
-
-		const absA = this.getAbsA();
-		const relA = this.getRelA();
-
-		this.debugScreen.text = `
-			fps: ${round(total / avgAmount)}\n
-			relA: ${round(relA.re)}, ${round(relA.im)}\n
-			relV: ${round(this.relVx)}, ${round(this.relVy)}\n
-			a: ${round(absA.re)}, ${round(absA.im)} \n
-			v: ${round(this.vx)}, ${round(this.vy)}\n
-			d: ${round(this.x)}, ${round(this.y)}`;
-
-
-
+	updateSprite ()
+	{
 		if (Math.abs(this.relVx) < 0.5)
 		{
 			this.sprite.animationSpeed = 0.1;
@@ -249,31 +172,28 @@ class Strawberry extends GameObject
 		sign == 0 ? sign = 1 : "";
 
 		this.sprite.scale.x = sign;
+	}
 
-		this.debugScreen.rotation = this.rotation.arg();
-		this.debugScreen.x = viewport.corner.x;
-		this.debugScreen.y = viewport.corner.y;
+	addDebugShape (name, shape, pos, colour)
+	{
+		this.debugShapes[name] = {};
+		this.debugShapes[name].shape = new PIXI.Graphics();
+		this.debugShapes[name].shape.lineStyle(2, colour, 1);
 
-		// if (!this.disableGravity)
-		// {
-		this.setGravity();
-		// } else
-		// {
-		// 	Object.keys(this.gravityObjects).forEach(objectName =>
-		// 	{
-		// 		this.forces.x[objectName + "Gravity"] = 0;
-		// 		this.forces.y[objectName + "Gravity"] = 0;
-		// 	});
-		// 	this.rotation = Complex.ONE;
-		// }
+		if (shape == "circle")
+			this.debugShapes[name].shape.drawCircle(
+				pos.x,
+				pos.y,
+				pos.radius);
 
-		const follower = GameData.getObjectFromName("follower");
-		this.addDebugShape("follower", "circle", {
-			x: follower.x + this.radius,
-			y: follower.y + this.radius,
-			radius: this.radius / 2
-		}, 0xFFAA00);
+		else if (shape == "rectangle")
+			this.debugShapes[name].shape.drawRect(pos.x, pos.y, pos.width, pos.height);
 
+		this.debugShapes[name].shape.endFill();
+	}
+
+	updateDebugShapes ()
+	{
 		this.addDebugShape("hitbox", "circle", {
 			x: this.x + this.radius,
 			y: this.y + this.radius,
@@ -307,30 +227,136 @@ class Strawberry extends GameObject
 
 		this.debugShapes.coords.enabled = true;
 		this.debugShapes.hitbox.enabled = true;
+		this.debugShapes.viewport.enabled = true;
 		this.debugShapes.spritePos.enabled = true;
-		this.debugShapes.follower.enabled = true;
 		this.debugShapes.isFloating.enabled = true;
 		this.debugShapes.collisionChunks.enabled = true;
-
-		this.drawDebugShapes();
 	}
 
-	addDebugShape (name, shape, pos, colour)
+	setRotation ()
 	{
-		this.debugShapes[name] = {};
-		this.debugShapes[name].shape = new PIXI.Graphics();
-		this.debugShapes[name].shape.lineStyle(2, colour, 1);
+		if (!this.disableGravity)
+		{
+			const relPos = new Complex(
+				this.gravityObjects["planet"].centerX - this.centerX,
+				this.gravityObjects["planet"].centerY - this.centerY);
 
-		if (shape == "circle")
-			this.debugShapes[name].shape.drawCircle(
-				pos.x,
-				pos.y,
-				pos.radius);
+			this.rotation = new Complex({arg: relPos.arg(), abs: 1})
+				.mul(Complex.I.neg());
 
-		else if (shape == "rectangle")
-			rect.drawRect(pos.x, pos.y, pos.width, pos.height);
+			// const relPos = {};
 
-		this.debugShapes[name].shape.endFill();
+			// relPos.x = this.gravityObjects["planet"].centerX - this.centerX;
+			// relPos.y = this.gravityObjects["planet"].centerY - this.centerY;
+
+			// if (relPos.y > 0)
+			// {
+			// 	this.rotation = -Math.atan(relPos.x / relPos.y);
+			// }
+			// else if (relPos.y < 0)
+			// 	this.rotation = -Math.atan(relPos.x / relPos.y) + Math.PI;
+
+		} else this.rotation = Complex.ONE;
+
+		app.stage.rotation = -this.rotation.arg();
+	}
+
+	getFPS (delta)
+	{
+		const avgAmount = 10;
+		if (this.fps.length >= avgAmount)
+			this.fps.shift();
+		this.fps.push(60 * delta);
+
+		let total = 0;
+		this.fps.forEach((value) =>
+		{
+			total += value;
+		});
+		return total / avgAmount;
+	}
+
+	addDebugText (name, ...args)
+	{
+		function round (number, digits)
+		{
+			const factor = digits ? Math.pow(10, digits) : 100;
+			return Math.round(number * factor) / factor;
+		}
+
+		let text = `\n${name}: `;
+
+		args.forEach((element, i) =>
+		{
+			text += round(element);
+			if (args[i + 1] !== undefined)
+			{
+				text += ", ";
+			}
+		});
+
+		this.debugText.push(text);
+	}
+
+	setDebugScreen (delta)
+	{
+		this.debugScreen.rotation = this.rotation.arg();
+
+		const offset = new Complex(16, -8);
+		const corner = new Complex(viewport.corner.x, viewport.corner.y);
+		const debugPos = offset.mul(this.rotation).div(viewport.scale.x).add(corner);
+
+		this.debugScreen.x = debugPos.re;
+		this.debugScreen.y = debugPos.im;
+
+		const absA = this.getAbsA();
+		const relA = this.getRelA();
+
+		this.addDebugText("fps", this.getFPS(delta));
+		this.addDebugText("zoom", viewport.scale.x);
+		this.addDebugText("rotation", this.rotation.arg());
+		this.addDebugText("");
+		this.addDebugText("relA", relA.re, relA.im);
+		this.addDebugText("relV", this.relVx, this.relVy);
+		this.addDebugText("");
+		this.addDebugText("a", absA.re, absA.im);
+		this.addDebugText("v", this.vx, this.vy);
+		this.addDebugText("d", this.x, this.y);
+
+		this.debugScreen.text = "";
+
+		this.debugText.forEach((element) =>
+		{
+			this.debugScreen.text += element;
+		});
+
+		this.debugScreen.scale.set(1.5 / viewport.scale.x);
+		this.debugText = [];
+	}
+
+	updateViewport ()
+	{
+		const pos = new Complex(this.x + this.radius, this.y + this.radius);
+
+		const camCorner = new Complex(
+			-viewport.worldScreenWidth / 2,
+			-viewport.worldScreenHeight / 2);
+
+		const offset = pos.add(camCorner.mul(this.rotation));
+
+		viewport.corner = {x: offset.re, y: offset.im};
+
+		this.addDebugShape("viewportCenter", "circle", {
+			x: viewport.center.x,
+			y: viewport.center.y,
+			radius: 10
+		}, 0xFFAA00);
+		this.addDebugShape("viewport", "rectangle", {
+			x: viewport.corner.x,
+			y: viewport.corner.y,
+			width: viewport.worldScreenWidth,
+			height: viewport.worldScreenHeight
+		}, 0xFFAA00);
 	}
 
 	checkFloating ()

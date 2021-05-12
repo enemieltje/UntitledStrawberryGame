@@ -3163,9 +3163,9 @@ this.PIXI = this.PIXI || {};
                 let oldPoint;
 
                 if (!this.options.center)
-                {
-                    oldPoint = this.parent.toLocal(point );
-                }
+				{
+					oldPoint = this.parent.toLocal(point);
+				}
                 if (this.isAxisX())
                 {
                     this.parent.scale.x += change.x;
@@ -3173,7 +3173,7 @@ this.PIXI = this.PIXI || {};
                 if (this.isAxisY())
                 {
                     this.parent.scale.y += change.y;
-                }
+				}
 
                 this.parent.emit('zoomed', { viewport: this.parent, type: 'wheel' });
                 const clamp = this.parent.plugins.get('clamp-zoom', true);
@@ -3217,7 +3217,7 @@ this.PIXI = this.PIXI || {};
             const change = Math.pow(2, (1 + this.options.percent) * step);
 
             if (this.options.smooth)
-            {
+			{
                 const original = {
                     x: this.smoothing ? this.smoothing.x * (this.options.smooth - (this.smoothingCount )) : 0,
                     y: this.smoothing ? this.smoothing.y * (this.options.smooth - (this.smoothingCount )) : 0
@@ -3252,13 +3252,13 @@ this.PIXI = this.PIXI || {};
                 if (clamp)
                 {
                     clamp.clamp();
-                }
+				}
                 if (this.options.center)
                 {
                     this.parent.moveCenter(this.options.center);
                 }
                 else
-                {
+				{
                     const newPoint = this.parent.toGlobal(oldPoint );
 
                     this.parent.x += point.x - newPoint.x;
@@ -3502,20 +3502,20 @@ this.PIXI = this.PIXI || {};
             }
 
             // only handle wheel events where the mouse is over the viewport
-            const point = this.viewport.toLocal(this.getPointerPosition(event));
+            // const point = this.viewport.toLocal(this.getPointerPosition(event));
 
-            if (this.viewport.left <= point.x
-                && point.x <= this.viewport.right
-                && this.viewport.top <= point.y
-                && point.y <= this.viewport.bottom)
-            {
+            // if (this.viewport.left <= point.x
+            //     && point.x <= this.viewport.right
+            //     && this.viewport.top <= point.y
+            //     && point.y <= this.viewport.bottom)
+            // {
                 const stop = this.viewport.plugins.wheel(event);
 
                 if (stop && !this.viewport.options.passiveWheel)
                 {
                     event.preventDefault();
                 }
-            }
+            // }
         }
 
          pause()

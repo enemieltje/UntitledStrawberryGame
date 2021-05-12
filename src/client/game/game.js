@@ -36,7 +36,8 @@ app.stage.addChild(viewport);
 
 viewport
 	.drag()
-	.wheel();
+	.wheel({smooth: 5});
+// .wheel({center: {x: window.innerWidth / 2, y: (window.innerHeight - 4) / 2}, smooth: 5});
 // .clamp({direction: 'all'});
 
 loadLoadingScreen();
@@ -106,8 +107,8 @@ function onStart ()
 
 	GameData.getObjectFromName("planet").addToParent();
 	GameData.getObjectFromName("strawberry").addToParent();
-	viewport.addChild(GameData.getObjectFromName("follower"));
-	viewport.follow(GameData.getObjectFromName("follower"), {radius: 192});
+	// viewport.addChild(GameData.getObjectFromName("follower"));
+	// viewport.follow(GameData.getObjectFromName("follower"), {radius: 192});
 
 	BeepBox = sounds["game/sounds/BeepBox-Song.mp3"];
 	BeepBox.play();
