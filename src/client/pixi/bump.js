@@ -411,19 +411,22 @@ class Bump
 			vx, vy, dx, dy, s = {},
 			hit = false;
 
-		//Calculate the vector between the circles’ center points
+		if (frame == 0)
+			// console.log("here");
 
-		if (global)
-		{
-			//Use global coordinates
-			vx = (c2.gx + (c2.radius) - c2.xAnchorOffset) - (c1.gx + (c1.radius) - c1.xAnchorOffset);
-			vy = (c2.gy + (c2.radius) - c2.yAnchorOffset) - (c1.gy + (c1.radius) - c1.yAnchorOffset);
-		} else
-		{
-			//Use local coordinates
-			vx = (c2.x + (c2.radius) - c2.xAnchorOffset) - (c1.x + (c1.radius) - c1.xAnchorOffset);
-			vy = (c2.y + (c2.radius) - c2.yAnchorOffset) - (c1.y + (c1.radius) - c1.yAnchorOffset);
-		}
+			//Calculate the vector between the circles’ center points
+
+			if (global)
+			{
+				//Use global coordinates
+				vx = (c2.gx + (c2.radius) - c2.xAnchorOffset) - (c1.gx + (c1.radius) - c1.xAnchorOffset);
+				vy = (c2.gy + (c2.radius) - c2.yAnchorOffset) - (c1.gy + (c1.radius) - c1.yAnchorOffset);
+			} else
+			{
+				//Use local coordinates
+				vx = (c2.x + (c2.radius) - c2.xAnchorOffset) - (c1.x + (c1.radius) - c1.xAnchorOffset);
+				vy = (c2.y + (c2.radius) - c2.yAnchorOffset) - (c1.y + (c1.radius) - c1.yAnchorOffset);
+			}
 
 		//Find the distance between the circles by calculating
 		//the vector's magnitude (how long the vector is)
@@ -732,26 +735,27 @@ class Bump
 						collision = "top";
 						//Move the rectangle out of the collision
 						r1.y = r1.y + overlapY;
+						r1.vy = 0;
 					} else
 					{
 						collision = "bottom";
 						//Move the rectangle out of the collision
 						r1.y = r1.y - overlapY;
+						r1.vy = 0;
 					}
 
 					//Bounce
 					if (bounce)
 					{
 						r1.vy *= -1;
-						r1.vy /= r1.absorbtion;
 
 						/*Alternative
 						//Find the bounce surface's vx and vy properties
 						var s = {};
 						s.vx = r2.x - r2.x + r2.width;
 						s.vy = 0;
-						//Bounce r1 off the surface
-						//this.bounceOffSurface(r1, s);
+						// Bounce r1 off the surface
+						this.bounceOffSurface(r1, s);
 						*/
 
 					}
@@ -765,11 +769,13 @@ class Bump
 						collision = "left";
 						//Move the rectangle out of the collision
 						r1.x = r1.x + overlapX;
+						r1.vx = 0;
 					} else
 					{
 						collision = "right";
 						//Move the rectangle out of the collision
 						r1.x = r1.x - overlapX;
+						r1.vx = 0;
 					}
 
 					//Bounce
@@ -1254,15 +1260,15 @@ class Bump
 		s.dx = s.x / s.magnitude;
 		s.dy = s.y / s.magnitude;
 
-		if (moveObject)
-		{
-			moveObject.vx /= (o.absorbtion - 1) * Math.abs(s.dy) + 1;
-			moveObject.vy /= (o.absorbtion - 1) * Math.abs(s.dx) + 1;
-		} else
-		{
-			o.vx /= (o.absorbtion - 1) * Math.abs(s.dy) + 1;
-			o.vy /= (o.absorbtion - 1) * Math.abs(s.dx) + 1;
-		}
+		// if (moveObject)
+		// {
+		// 	moveObject.vx /= (o.absorbtion - 1) * Math.abs(s.dy) + 1;
+		// 	moveObject.vy /= (o.absorbtion - 1) * Math.abs(s.dx) + 1;
+		// } else
+		// {
+		// 	o.vx /= (o.absorbtion - 1) * Math.abs(s.dy) + 1;
+		// 	o.vy /= (o.absorbtion - 1) * Math.abs(s.dx) + 1;
+		// }
 
 		if (doBounce)
 		{

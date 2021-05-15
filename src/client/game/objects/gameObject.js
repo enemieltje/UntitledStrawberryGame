@@ -1,3 +1,5 @@
+/*
+
 class GameObject
 {
 	static soundFiles = [];
@@ -82,10 +84,7 @@ class GameObject
 		});
 	}
 
-	static create ()
-	{
-		// const tileset = app.loader.resources[`game/sprites/background.json`].textures;
-	}
+	static create () {}
 
 	set applyPhysics (applyPhysics)
 	{
@@ -133,9 +132,6 @@ class GameObject
 			this.sprite.x = spritePos.re;
 			this.sprite.y = spritePos.im;
 
-			// this.sprite.x = this.x + this.sprite.anchor.x * (this.sprite.radius * 2 || this.sprite.width) + this.spriteOffset.x;
-			// this.sprite.y = this.y + this.sprite.anchor.y * (this.sprite.radius * 2 || this.sprite.height) + this.spriteOffset.y;
-
 			this.sprite.rotation = this.rotation.arg();
 		}
 	}
@@ -161,13 +157,6 @@ class GameObject
 			this.vx += absF.re * delta;
 			this.vy += absF.im * delta;
 		});
-
-		// let resultAx = 0, resultAy = 0;
-
-		// resultAx += this.relAx * Math.cos(this.rotation);
-		// resultAx += this.relAy * Math.sin(this.rotation);
-		// resultAy += this.relAx * Math.sin(this.rotation);
-		// resultAy += this.relAy * Math.cos(this.rotation);
 
 		this.vx += this.ax * delta;
 		this.vy += this.ay * delta;
@@ -288,16 +277,11 @@ class GameObject
 		const absA = new Complex(relAx, this.relAy).mul(this.rotation);
 		this.ax = absA.re;
 		this.ay = absA.im;
-
-		// this.ax = relAx * Math.cos(this.rotation) + this.relAx * Math.sin(this.rotation);
-		// this.ay = relAx * Math.sin(this.rotation) + this.relAy * Math.cos(this.rotation);
 	}
 
 	get relAx ()
 	{
 		return new Complex(this.ax, this.ay).div(this.rotation).re;
-
-		// return this.ax * Math.cos(this.rotation) + this.ay * Math.sin(this.rotation);
 	}
 
 	set relAy (relAy)
@@ -305,19 +289,12 @@ class GameObject
 		const absA = new Complex(this.relAx, relAy).mul(this.rotation);
 		this.ax = absA.re;
 		this.ay = absA.im;
-
-		// this.ax = relAy * Math.sin(this.rotation) + this.relAx * Math.cos(this.rotation);
-		// this.ay = relAy * Math.cos(this.rotation) + this.relAy * Math.sin(this.rotation);
 	}
 
 	get relAy ()
 	{
 		return new Complex(this.ax, this.ay).div(this.rotation).im;
-
-		// return this.ax * Math.sin(this.rotation) + this.ay * Math.cos(this.rotation);
 	}
-
-
 
 
 	set relVx (relVx)
@@ -325,16 +302,11 @@ class GameObject
 		const absV = new Complex(relVx, this.relVy).mul(this.rotation);
 		this.vx = absV.re;
 		this.vy = absV.im;
-
-		// this.vx = relVx * Math.cos(this.rotation) + this.relVx * Math.sin(this.rotation);
-		// this.vy = relVx * Math.sin(this.rotation) + this.relVx * Math.cos(this.rotation);
 	}
 
 	get relVx ()
 	{
 		return new Complex(this.vx, this.vy).div(this.rotation).re;
-
-		// return this.vx * Math.cos(this.rotation) + this.vy * Math.sin(this.rotation);
 	}
 
 	set relVy (relVy)
@@ -342,16 +314,11 @@ class GameObject
 		const absV = new Complex(this.relVx, relVy).mul(this.rotation);
 		this.vx = absV.re;
 		this.vy = absV.im;
-
-		// this.vx = relVy * Math.sin(this.rotation) + this.relVx * Math.cos(this.rotation);
-		// this.vy = relVy * Math.cos(this.rotation) + this.relVx * Math.sin(this.rotation);
 	}
 
 	get relVy ()
 	{
 		return new Complex(this.vx, this.vy).div(this.rotation).im;
-
-		// return this.vx * Math.sin(this.rotation) + this.vy * Math.cos(this.rotation);
 	}
 
 	getAbsA ()
@@ -408,3 +375,4 @@ class GameObject
 		return this.y - this.sprite.anchor.y * returnValue;
 	}
 }
+*/

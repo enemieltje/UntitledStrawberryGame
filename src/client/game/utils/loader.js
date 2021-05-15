@@ -10,6 +10,12 @@ class Loader
 
 	static load ()
 	{
+		const style = new PIXI.TextStyle({
+			fontSize: 12,
+			fill: "white",
+		});
+		GameData.debugScreen = new PIXI.Text("", style);
+
 		GameData.setSpriteOffset("jerryIdle.json", -23, -35);
 		GameData.setSpriteOffset("runningJerry.json", -23, -46);
 		// GameData.setSpriteOffset("runningJerry.json", {x: 0, y: 0});
@@ -86,12 +92,13 @@ class Loader
 	{
 		console.log("Creating Sprites");
 
-		GameData.onCreate();
+		GameData.loadSprites();
 		Loader.objectTypes.forEach(object =>
 		{
 			console.log(`creating ${object.name}`);
 			object.create();
 		});
+		GameData.updateAllChunks();
 
 		console.log("Sprites finished creating");
 		Loader.spritesReady = true;

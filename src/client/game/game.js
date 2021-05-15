@@ -115,12 +115,14 @@ function onStart ()
 	BeepBox.volume = 0.25;
 	sounds["game/sounds/Boing.mp3"].volume = 0.5;
 	GameData.getObjectFromName("planet").drawShape();
-	GameData.getObjectFromName("strawberry").drawDebugScreen();
+	GameData.drawDebugScreen();
 }
 
 function tick (delta)
 {
+	GameData.deleteDebugShapes();
 	stateTick(delta);
+	GameData.drawDebugShapes();
 }
 
 function walkTick (delta)
@@ -129,10 +131,10 @@ function walkTick (delta)
 	if (GameData.frame >= 60) GameData.frame = 0;
 
 	GameData.getObjectFromName("strawberry").step(delta);
-	GameData.getObjectFromName("planet").step(delta);
-	GameData.getObjectArrayFromName("block").forEach((block) =>
-	{
-		block.step(delta);
-	});
+	// GameData.getObjectFromName("planet").step(delta);
+	// GameData.getObjectArrayFromName("block").forEach((block) =>
+	// {
+	// 	block.step(delta);
+	// });
 }
 

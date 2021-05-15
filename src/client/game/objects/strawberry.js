@@ -1,4 +1,4 @@
-class Strawberry extends GameObject
+class Strawberry extends MovingObject
 {
 	static name = "strawberry";
 	static tileset = [];
@@ -12,51 +12,31 @@ class Strawberry extends GameObject
 
 	speed = 0.2;
 	jumpHeight = 10;
-	gravity = 0.5;
-	gravityObjects = {planet: GameData.getObjectFromName("planet")};
 	applyGravity = true;
-	isFloating = true;
+	canJump = false;
+	lastCanJump = false;
 
 	disableGravity = false;
 	fps = [];
-	debugShapes = {};
-	debugScreen;
-	debugText = [];
 
 	constructor ()
 	{
 		const properties =
 		{
-			x: 96,
-			y: 96,
-			radius: 30,
-			applyPhisics: true,
-			static: false,
-			bounce: false,
-			drag: 0.01
+			pos: new Complex(96, 96),
+			radius: 30
 		};
-		super(Strawberry.name, properties, GameData.getSprite(`jerryIdle.json`));
+		super(properties, "jerryIdle.json");
 
 		this.sprite.animationSpeed = 0.2;
 		this.sprite.anchor.x = 0.52;
 		this.walkSetup();
-
-		const style = new PIXI.TextStyle({
-			fontSize: 12,
-			fill: "white",
-		});
-		this.debugScreen = new PIXI.Text("", style);
-	}
-
-	drawDebugScreen ()
-	{
-		viewport.addChild(this.debugScreen);
 	}
 
 	static onLoad ()
 	{
 		Strawberry.soundFiles.push("Boing.mp3");
-		super.onLoad(["runningJerry.json", "jerryIdle.json"]);
+		super.onLoad(["jerryIdle.json", "runningJerry.json"]);
 	}
 
 	static create ()
@@ -66,23 +46,23 @@ class Strawberry extends GameObject
 
 	walkSetup ()
 	{
-		this.relForces.walk = {x: 0, y: 0};
+		this.relForces.walk = new Complex(0, 0);
+
 		this.toggleGravity.press = () =>
 		{
-			if (this.disableGravity) this.disableGravity = false;
-			else this.disableGravity = true;
+			this.disableGravity = !this.disableGravity;
 		};
 
 		this.walkUp.press = () =>
 		{
 			if (this.disableGravity)
 			{
-				this.relForces.walk.y += -this.speed;
+				this.relForces.walk.im += -this.speed;
 			} else
 			{
-				if (!this.isFloating)
+				if (this.canJump)
 				{
-					this.relVy += -this.jumpHeight;
+					this.v = this.v.add(new Complex(0, -this.jumpHeight).mul(this.rotation));
 					sounds["game/sounds/Boing.mp3"].play();
 				}
 			}
@@ -92,27 +72,30 @@ class Strawberry extends GameObject
 		{
 			if (this.disableGravity)
 			{
-				this.relForces.walk.y = 0;
+				this.relForces.walk.im = 0;
 				if (this.walkDown.isDown) this.walkDown.press();
 			}
 		};
 
 		this.walkLeft.press = () =>
 		{
-			this.relForces.walk.x += -this.speed;
+			if (this.disableGravity || this.canJump) this.relForces.walk.re += -this.speed;
 		};
 
 		this.walkLeft.release = () =>
 		{
-			this.relForces.walk.x = 0;
-			if (this.walkRight.isDown) this.walkRight.press();
+			if (this.disableGravity || this.canJump)
+			{
+				this.relForces.walk.re = 0;
+				if (this.walkRight.isDown) this.walkRight.press();
+			}
 		};
 
 		this.walkDown.press = () =>
 		{
 			if (this.disableGravity)
 			{
-				this.relForces.walk.y += this.speed;
+				this.relForces.walk.im += this.speed;
 			}
 		};
 
@@ -120,246 +103,43 @@ class Strawberry extends GameObject
 		{
 			if (this.disableGravity)
 			{
-				this.relForces.walk.y = 0;
+				this.relForces.walk.im = 0;
 				if (this.walkUp.isDown) this.walkUp.press();
 			}
 		};
 
 		this.walkRight.press = () =>
 		{
-			this.relForces.walk.x += this.speed;
+			if (this.disableGravity || this.canJump) this.relForces.walk.re += this.speed;
 		};
 
 		this.walkRight.release = () =>
 		{
-			this.relForces.walk.x = 0;
-			if (this.walkLeft.isDown) this.walkLeft.press();
+			if (this.disableGravity || this.canJump)
+			{
+				this.relForces.walk.re = 0;
+				if (this.walkLeft.isDown) this.walkLeft.press();
+			}
 		};
 	}
 
 	step (delta)
 	{
-		super.step(delta);
 
-		this.deleteDebugShapes();
+		super.step(delta);
+		this.checkJump();
+		this.correctMovement();
 
 		this.setRotation();
-		this.updateSprite();
+		this.setSprite();
 		this.updateViewport();
-
-		this.checkFloating();
-		this.setGravity();
 
 		this.setDebugScreen(delta);
 
 		this.updateDebugShapes();
-		this.drawDebugShapes();
 	}
 
-	updateSprite ()
-	{
-		if (Math.abs(this.relVx) < 0.5)
-		{
-			this.sprite.animationSpeed = 0.1;
-			this.image = "jerryIdle.json";
-		} else
-		{
-			this.sprite.animationSpeed = Math.abs(this.relVx) / 16;
-			this.image = "runningJerry.json";
-		}
-
-		let sign = Math.sign(this.relVx);
-		sign == 0 ? sign = 1 : "";
-
-		this.sprite.scale.x = sign;
-	}
-
-	addDebugShape (name, shape, pos, colour)
-	{
-		this.debugShapes[name] = {};
-		this.debugShapes[name].shape = new PIXI.Graphics();
-		this.debugShapes[name].shape.lineStyle(2, colour, 1);
-
-		if (shape == "circle")
-			this.debugShapes[name].shape.drawCircle(
-				pos.x,
-				pos.y,
-				pos.radius);
-
-		else if (shape == "rectangle")
-			this.debugShapes[name].shape.drawRect(pos.x, pos.y, pos.width, pos.height);
-
-		this.debugShapes[name].shape.endFill();
-	}
-
-	updateDebugShapes ()
-	{
-		this.addDebugShape("hitbox", "circle", {
-			x: this.x + this.radius,
-			y: this.y + this.radius,
-			radius: this.radius
-		}, 0x00FF00);
-
-		this.addDebugShape("coords", "circle", {
-			x: this.x,
-			y: this.y,
-			radius: 3
-		}, 0x00FF00);
-
-		this.addDebugShape("spritePos", "circle", {
-			x: this.sprite.x,
-			y: this.sprite.y,
-			radius: 3
-		}, 0x00FFFF);
-
-		this.debugShapes.collisionChunks = {};
-		this.debugShapes.collisionChunks.shape = new PIXI.Graphics();
-		this.debugShapes.collisionChunks.shape.lineStyle(4, 0xFF33FF, 1);
-		this.collisionChunks.forEach((chunk) =>
-		{
-			this.debugShapes.collisionChunks.shape.drawRect(
-				chunk.x * chunksize.x,
-				chunk.y * chunksize.y,
-				chunksize.x,
-				chunksize.y);
-		});
-		this.debugShapes.collisionChunks.shape.endFill();
-
-		this.debugShapes.coords.enabled = true;
-		this.debugShapes.hitbox.enabled = true;
-		this.debugShapes.viewport.enabled = true;
-		this.debugShapes.spritePos.enabled = true;
-		this.debugShapes.isFloating.enabled = true;
-		this.debugShapes.collisionChunks.enabled = true;
-	}
-
-	setRotation ()
-	{
-		if (!this.disableGravity)
-		{
-			const relPos = new Complex(
-				this.gravityObjects["planet"].centerX - this.centerX,
-				this.gravityObjects["planet"].centerY - this.centerY);
-
-			this.rotation = new Complex({arg: relPos.arg(), abs: 1})
-				.mul(Complex.I.neg());
-
-			// const relPos = {};
-
-			// relPos.x = this.gravityObjects["planet"].centerX - this.centerX;
-			// relPos.y = this.gravityObjects["planet"].centerY - this.centerY;
-
-			// if (relPos.y > 0)
-			// {
-			// 	this.rotation = -Math.atan(relPos.x / relPos.y);
-			// }
-			// else if (relPos.y < 0)
-			// 	this.rotation = -Math.atan(relPos.x / relPos.y) + Math.PI;
-
-		} else this.rotation = Complex.ONE;
-
-		app.stage.rotation = -this.rotation.arg();
-	}
-
-	getFPS (delta)
-	{
-		const avgAmount = 10;
-		if (this.fps.length >= avgAmount)
-			this.fps.shift();
-		this.fps.push(60 * delta);
-
-		let total = 0;
-		this.fps.forEach((value) =>
-		{
-			total += value;
-		});
-		return total / avgAmount;
-	}
-
-	addDebugText (name, ...args)
-	{
-		function round (number, digits)
-		{
-			const factor = digits ? Math.pow(10, digits) : 100;
-			return Math.round(number * factor) / factor;
-		}
-
-		let text = `\n${name}: `;
-
-		args.forEach((element, i) =>
-		{
-			text += round(element);
-			if (args[i + 1] !== undefined)
-			{
-				text += ", ";
-			}
-		});
-
-		this.debugText.push(text);
-	}
-
-	setDebugScreen (delta)
-	{
-		this.debugScreen.rotation = this.rotation.arg();
-
-		const offset = new Complex(16, -8);
-		const corner = new Complex(viewport.corner.x, viewport.corner.y);
-		const debugPos = offset.mul(this.rotation).div(viewport.scale.x).add(corner);
-
-		this.debugScreen.x = debugPos.re;
-		this.debugScreen.y = debugPos.im;
-
-		const absA = this.getAbsA();
-		const relA = this.getRelA();
-
-		this.addDebugText("fps", this.getFPS(delta));
-		this.addDebugText("zoom", viewport.scale.x);
-		this.addDebugText("rotation", this.rotation.arg());
-		this.addDebugText("");
-		this.addDebugText("relA", relA.re, relA.im);
-		this.addDebugText("relV", this.relVx, this.relVy);
-		this.addDebugText("");
-		this.addDebugText("a", absA.re, absA.im);
-		this.addDebugText("v", this.vx, this.vy);
-		this.addDebugText("d", this.x, this.y);
-
-		this.debugScreen.text = "";
-
-		this.debugText.forEach((element) =>
-		{
-			this.debugScreen.text += element;
-		});
-
-		this.debugScreen.scale.set(1.5 / viewport.scale.x);
-		this.debugText = [];
-	}
-
-	updateViewport ()
-	{
-		const pos = new Complex(this.x + this.radius, this.y + this.radius);
-
-		const camCorner = new Complex(
-			-viewport.worldScreenWidth / 2,
-			-viewport.worldScreenHeight / 2);
-
-		const offset = pos.add(camCorner.mul(this.rotation));
-
-		viewport.corner = {x: offset.re, y: offset.im};
-
-		this.addDebugShape("viewportCenter", "circle", {
-			x: viewport.center.x,
-			y: viewport.center.y,
-			radius: 10
-		}, 0xFFAA00);
-		this.addDebugShape("viewport", "rectangle", {
-			x: viewport.corner.x,
-			y: viewport.corner.y,
-			width: viewport.worldScreenWidth,
-			height: viewport.worldScreenHeight
-		}, 0xFFAA00);
-	}
-
-	checkFloating ()
+	checkJump ()
 	{
 		const collisionCandidates = [];
 		this.collisionChunks.forEach((chunkId) =>
@@ -380,98 +160,190 @@ class Strawberry extends GameObject
 			});
 		});
 
-		this.isFloating = true;
+		this.canJump = false;
 
-		const hitBox = {x: this.x - 2, y: this.y - 2, radius: this.radius + 2, isSprite: true, name: "hitBox"};
+		const hitBox = {x: this.x - 4, y: this.y - 4, radius: this.radius + 4, isSprite: true, name: "hitBox"};
 
 		collisionCandidates.forEach(object =>
 		{
 			if (bump.hit(hitBox, object))
 			{
-				this.isFloating = false;
+				this.canJump = true;
 			}
 		});
 
-		this.addDebugShape("isFloating", "circle", {
+		GameData.addDebugShape("canJump", "circle", {
 			x: hitBox.x + hitBox.radius,
 			y: hitBox.y + hitBox.radius,
 			radius: hitBox.radius
-		}, 0x0000FF);
+		}, 0x00FFFF);
 	}
 
-	setGravity ()
+	correctMovement ()
 	{
-		if (this.isFloating && !this.disableGravity)
+		if (this.lastCanJump && !this.canJump)
 		{
-			Object.keys(this.gravityObjects).forEach(objectName =>
-			{
-				const thisCenter = new Complex(this.centerX, this.centerY);
-				const gravityCenter = new Complex(
-					this.gravityObjects[objectName].centerX,
-					this.gravityObjects[objectName].centerY);
+			this.relForces.walk.re = 0;
+		}
 
-				const distance = gravityCenter.sub(thisCenter).abs();
-				const gravForce = (this.gravityObjects["planet"].mass * this.mass) / Math.pow(distance, 2);
+		if (!this.lastCanJump && this.canJump)
+		{
+			if (this.walkLeft.isDown) this.walkLeft.press();
+			if (this.walkRight.isDown) this.walkRight.press();
+		}
+		this.lastCanJump = this.canJump;
+	}
 
-				this.relForces[objectName + "Gravity"] = {x: 0, y: gravForce};
-
-				// const relPos = {};
-
-				// relPos.x = this.gravityObjects[objectName].centerX - this.centerX;
-				// relPos.y = this.gravityObjects[objectName].centerY - this.centerY;
-
-				// const distance = Math.sqrt(relPos.x * relPos.x + relPos.y * relPos.y);
-
-				// const gravityConstant = 1;
-				// const gravForce = (gravityConstant * this.gravityObjects["planet"].mass * this.mass) / Math.pow(distance, 2);
-
-				// const dx = relPos.x / distance;
-				// const dy = relPos.y / distance;
-
-				// const gravX = gravForce * dx;
-				// const gravY = gravForce * dy;
-
-				// this.forces.x[objectName + "Gravity"] = gravX;
-				// this.forces.y[objectName + "Gravity"] = gravY;
-			});
+	setSprite ()
+	{
+		const relVx = this.v.div(this.rotation).re;
+		if (Math.abs(relVx) < 0.5)
+		{
+			this.sprite.animationSpeed = 0.1;
+			this.image = "jerryIdle.json";
 		} else
 		{
-			Object.keys(this.gravityObjects).forEach(objectName =>
-			{
-				this.relForces[objectName + "Gravity"] = {x: 0, y: 0};
-
-				// this.forces.x[objectName + "Gravity"] = 0;
-				// this.forces.y[objectName + "Gravity"] = 0;
-			});
+			this.sprite.animationSpeed = Math.abs(relVx) / 16;
+			this.image = "runningJerry.json";
 		}
+
+		let sign = Math.sign(relVx);
+		sign == 0 ? sign = 1 : "";
+
+		this.sprite.scale.x = sign;
 	}
 
-	deleteDebugShapes ()
+	updateDebugShapes ()
 	{
+		GameData.addDebugShape("hitbox", "circle", {
+			x: this.x + this.radius,
+			y: this.y + this.radius,
+			radius: this.radius
+		}, 0x00FF00);
 
-		Object.keys(this.debugShapes).forEach((shapeName) =>
+		GameData.addDebugShape("coords", "circle", {
+			x: this.x,
+			y: this.y,
+			radius: 3
+		}, 0x00FF00);
+
+		GameData.addDebugShape("spritePos", "circle", {
+			x: this.sprite.x,
+			y: this.sprite.y,
+			radius: 3
+		}, 0x00FFFF);
+
+		GameData.debugShapes.collisionChunks = {};
+		GameData.debugShapes.collisionChunks.shape = new PIXI.Graphics();
+		GameData.debugShapes.collisionChunks.shape.lineStyle(4, 0xFF33FF, 1);
+		this.collisionChunks.forEach((chunk) =>
 		{
-			viewport.removeChild(this.debugShapes[shapeName].shape);
-			// this.debugShapes[shapeName].shapes.forEach((shape) =>
-			// {
-			// 	viewport.removeChild(shape);
-			// });
+			GameData.debugShapes.collisionChunks.shape.drawRect(
+				chunk.x * chunksize.x,
+				chunk.y * chunksize.y,
+				chunksize.x,
+				chunksize.y);
 		});
+		GameData.debugShapes.collisionChunks.shape.endFill();
+
+		GameData.debugShapes.coords.enabled = true;
+		GameData.debugShapes.hitbox.enabled = true;
+		GameData.debugShapes.canJump.enabled = false;
+		GameData.debugShapes.viewport.enabled = false;
+		GameData.debugShapes.spritePos.enabled = false;
+		GameData.debugShapes.isFloating.enabled = false;
+		GameData.debugShapes.collisionChunks.enabled = true;
 	}
 
-	drawDebugShapes ()
+	setRotation ()
 	{
-		Object.keys(this.debugShapes).forEach((shapeName) =>
+		if (!this.disableGravity)
 		{
-			if (this.debugShapes[shapeName].enabled)
-			{
-				viewport.addChild(this.debugShapes[shapeName].shape);
-				// this.debugShapes[shapeName].shapes.forEach((shape) =>
-				// {
-				// 	viewport.addChild(shape);
-				// });
-			}
+			const closestPlanet = this.getClosestGravityObject();
+			const relPos = closestPlanet.center.sub(this.center);
+
+			this.rotation = new Complex({arg: relPos.arg(), abs: 1}).div(new Complex(0, 1));
+		}
+		else this.rotation = new Complex(1, 0);
+
+		app.stage.rotation = -this.rotation.arg();
+	}
+
+	getFPS (delta)
+	{
+		const avgAmount = 10;
+		if (this.fps.length >= avgAmount)
+			this.fps.shift();
+		this.fps.push(60 * delta);
+
+		let total = 0;
+		this.fps.forEach((value) =>
+		{
+			total += value;
 		});
+		return total / avgAmount;
+	}
+
+	setDebugScreen (delta)
+	{
+		GameData.debugScreen.rotation = this.rotation.arg();
+
+		const offset = new Complex(16, -8);
+		const corner = new Complex(viewport.corner.x, viewport.corner.y);
+		const debugPos = offset.mul(this.rotation).div(viewport.scale.x).add(corner);
+
+		GameData.debugScreen.x = debugPos.re;
+		GameData.debugScreen.y = debugPos.im;
+
+		const absA = this.getAbsA();
+		const relA = this.getRelA();
+		const relV = this.v.div(this.rotation);
+
+		GameData.addDebugText("fps", this.getFPS(delta));
+		GameData.addDebugText("zoom", viewport.scale.x);
+		GameData.addDebugText("rotation", this.rotation.arg());
+		GameData.addDebugText("");
+		GameData.addDebugText("relA", relA.re, relA.im);
+		GameData.addDebugText("relV", relV.re, relV.im);
+		GameData.addDebugText("");
+		GameData.addDebugText("a", absA.re, absA.im);
+		GameData.addDebugText("v", this.v.re, this.v.im);
+		GameData.addDebugText("d", this.x, this.y);
+
+		GameData.debugScreen.text = "";
+
+		GameData.debugText.forEach((element) =>
+		{
+			GameData.debugScreen.text += element;
+		});
+
+		GameData.debugScreen.scale.set(1.5 / viewport.scale.x);
+		GameData.debugText = [];
+	}
+
+	updateViewport ()
+	{
+		const pos = new Complex(this.x + this.radius, this.y + this.radius);
+
+		const camCorner = new Complex(
+			-viewport.worldScreenWidth / 2,
+			-viewport.worldScreenHeight / 2);
+
+		const offset = pos.add(camCorner.mul(this.rotation));
+
+		viewport.corner = {x: offset.re, y: offset.im};
+
+		GameData.addDebugShape("viewportCenter", "circle", {
+			x: viewport.center.x,
+			y: viewport.center.y,
+			radius: 10
+		}, 0xFFAA00);
+		GameData.addDebugShape("viewport", "rectangle", {
+			x: viewport.corner.x,
+			y: viewport.corner.y,
+			width: viewport.worldScreenWidth,
+			height: viewport.worldScreenHeight
+		}, 0xFFAA00);
 	}
 }
 

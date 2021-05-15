@@ -1,11 +1,12 @@
-class Block extends GameObject
+class Block extends StaticObject
 {
 	static name = "block";
 
 	constructor (x, y)
 	{
-		super(Block.name, {x: x, y: y, height: 64, width: 64});
-		this.applyPhisics = true;
+		// super(Block.name, {x: x, y: y, height: 64, width: 64});
+		super({pos: new Complex(x, y), height: 64, width: 64}, "block.png");
+		// this.applyPhisics = true;
 		// this.sprite.properties.mass = Math.pow(10, 100);
 		// this.sprite.properties.mass = 0.001;
 		// this.sprite.properties.static = false;
