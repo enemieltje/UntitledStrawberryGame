@@ -744,6 +744,14 @@ class Bump
 						r1.vy = 0;
 					}
 
+					if (r1.absForces)
+					{
+						const f = r1.getAbsA().mul(r1.mass).sub(r1.absForces.normal);
+						const angle = r2.rotation.arg() + Math.PI / 2 || 0;
+						const fNor = f.div(new Complex({arg: angle, abs: 1})).re;
+						r1.absForces.normal = new Complex({arg: angle, abs: -fNor});
+					}
+
 					//Bounce
 					if (bounce)
 					{
@@ -776,6 +784,14 @@ class Bump
 						//Move the rectangle out of the collision
 						r1.x = r1.x - overlapX;
 						r1.vx = 0;
+					}
+
+					if (r1.absForces)
+					{
+						const f = r1.getAbsA().mul(r1.mass).sub(r1.absForces.normal);
+						const angle = r2.rotation.arg() || 0;
+						const fNor = f.div(new Complex({arg: angle, abs: 1})).re;
+						r1.absForces.normal = new Complex({arg: angle, abs: -fNor});
 					}
 
 					//Bounce
@@ -1304,15 +1320,11 @@ class Bump
 			if (moveObject)
 			{
 				moveObject.vx = -bounce.x / mass;
-				// moveObject.vx /= moveObject.absorbtion * Math.abs(s.dy);
 				moveObject.vy = -bounce.y / mass;
-				// moveObject.vy /= moveObject.absorbtion * Math.abs(s.dx);
 			} else
 			{
 				o.vx = bounce.x / mass;
-				// o.vx /= o.absorbtion * Math.abs(s.dy);
 				o.vy = bounce.y / mass;
-				// o.vy /= o.absorbtion * Math.abs(s.dx);
 			}
 		} else
 		{
@@ -1322,12 +1334,28 @@ class Bump
 
 				moveObject.vx = s.dx * magn / mass;
 				moveObject.vy = s.dy * magn / mass;
+
+				if (moveObject.absForces)
+				{
+					const f = moveObject.getAbsA().mul(moveObject.mass).sub(moveObject.absForces.normal);
+					const angle = new Complex(s.lx, s.ly).arg();
+					const fNor = f.div(new Complex({arg: angle, abs: 1})).re;
+					moveObject.absForces.normal = new Complex({arg: angle, abs: -fNor});
+				}
 			} else
 			{
 				const magn = o.vx * s.dx + o.vy * s.dy;
 
 				o.vx = s.dx * magn / mass;
 				o.vy = s.dy * magn / mass;
+
+				if (o.absForces)
+				{
+					const f = o.getAbsA().mul(o.mass).sub(o.absForces.normal);
+					const angle = new Complex(s.lx, s.ly).arg();
+					const fNor = f.div(new Complex({arg: angle, abs: 1})).re;
+					o.absForces.normal = new Complex({arg: angle, abs: -fNor});
+				}
 			}
 		}
 	}

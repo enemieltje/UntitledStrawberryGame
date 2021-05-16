@@ -27,6 +27,7 @@ class GameData
 	{
 		function round (number, digits)
 		{
+			if (typeof number == "string") return number;
 			const factor = digits ? Math.pow(10, digits) : 100;
 			return Math.round(number * factor) / factor;
 		}

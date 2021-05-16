@@ -3,9 +3,12 @@ class MovingObject extends StaticObject
 	v = new Complex(0, 0);
 	a = new Complex(0, 0);
 
+	mass;
+
 	absForces = {};
 	relForces = {};
 
+	// isWalking = false;
 	isFloating = true;
 	lastCollisionObject;
 
@@ -15,6 +18,25 @@ class MovingObject extends StaticObject
 		this.mass = properties.mass || 1;
 	}
 
+	get relVx ()
+	{
+		return this.v.div(this.rotation).re;
+	}
+
+	set relVx (vx)
+	{
+		this.v = new Complex(vx, this.relVy).mul(this.rotation);
+	}
+
+	get relVy ()
+	{
+		return this.v.div(this.rotation).im;
+	}
+
+	set relVy (vy)
+	{
+		this.v = new Complex(this.relVx, vy).mul(this.rotation);
+	}
 
 	get vx ()
 	{
@@ -61,17 +83,67 @@ class MovingObject extends StaticObject
 	{
 		this.move(delta);
 
+		this.checkFloating();
 		this.setDrag();
 		this.setGravity();
-		this.checkFloating();
+		this.applyFriction();
 
 		this.updateChunk();
 		this.fixCollision();
 		this.updateSprite();
 
 		this.drawDebugArrows();
+	}
 
+	applyFriction ()
+	{
+		// using Coulomb friction model
+		if (!this.isFloating)
+		{
+			// 90 degrees to normal force; aka along the surface
+			let angle = this.absForces.normal.arg() + Math.PI / 2;
 
+			// length of the normal force
+			const fNormal = this.absForces.normal.abs();
+
+			// v and a component in this direction
+			let vAngle = this.v.div(new Complex({arg: angle, abs: 1}));
+			let aAngle = this.getAbsA().sub(this.absForces.friction).div(new Complex({arg: angle, abs: 1}));
+
+			// flip angle to be in the direction we're moving
+			if (vAngle.re < 0)
+			{
+				angle += Math.PI;
+				vAngle = vAngle.neg();
+				aAngle = aAngle.neg();
+			}
+
+			// static/kinetic friction depending on vAngle
+			if (vAngle.re < 0.5 && aAngle.re < fNormal)
+			{
+				// static friction, this can never be greater than normal force
+
+				// add a force that cancels all accaleration and thus movement
+				this.absForces.friction = new Complex({arg: angle, abs: -aAngle.re * this.mass});
+
+				// set v in this direction to zero, because we are not moving
+				const rotation = new Complex({arg: angle, abs: 1});
+				this.v = new Complex(0, this.v.div(rotation).im).mul(rotation);
+
+				GameData.addDebugText("friction", "static");
+			}
+			else
+			{
+				//kinetic friction, this is less than the maximum static friction and somewhat constant
+
+				this.absForces.friction = new Complex({arg: angle, abs: -fNormal * 0.5 * this.mass});
+				GameData.addDebugText("friction", "kinetic");
+			}
+		} else
+		{
+			// reset friction when we're no longer touching the surface
+			this.absForces.friction = new Complex(0, 0);
+		}
 	}
 
 	drawDebugArrows ()
@@ -132,6 +204,23 @@ class MovingObject extends StaticObject
 			}
 
 		});
+
+		const force = this.getAbsA().mul(1000);
+		GameData.addDebugShape(`ResultingArrow`, "rectangle", {
+			x: this.center.re,
+			y: this.center.im,
+			height: 1,
+			width: force.abs()
+		}, 0x0000FF, force.arg());
+
+		const textPos = this.center.add(force);
+		GameData.addDebugShape(`ResultingText`, "text", {
+			x: textPos.re,
+			y: textPos.im,
+			text: "Result"
+		}, 0x0000FF, this.rotation.arg());
+		GameData.debugShapes.ResultingArrow.enabled = true;
+		GameData.debugShapes.ResultingText.enabled = true;
 	}
 
 	move (delta)
@@ -238,6 +327,12 @@ class MovingObject extends StaticObject
 				} else
 					this.absForces[object.constructor.name + "Atmosphere"] = new Complex(0, 0);
 			});
+		} else
+		{
+			GameData.forEachGravityObject(object =>
+			{
+				this.absForces[object.constructor.name + "Atmosphere"] = new Complex(0, 0);
+			});
 		}
 	}
 
@@ -253,18 +348,18 @@ class MovingObject extends StaticObject
 				this.relForces[object.constructor.name + "Gravity"] = new Complex(0, gravForce);
 				if (!this.isFloating)
 				{
-					const arg = this.center.sub(this.lastCollisionObject.center).arg();
-					this.absForces[object.constructor.name + "Normal"] = new Complex({arg: arg, abs: gravForce});
+					// const arg = this.center.sub(this.lastCollisionObject.center).arg();
+					// this.absForces[object.constructor.name + "Normal"] = new Complex({arg: arg, abs: gravForce});
 				}
 				else
-					this.absForces[object.constructor.name + "Normal"] = new Complex(0, 0);
+					this.absForces.normal = new Complex(0, 0);
 			});
 		} else
 		{
 			GameData.forEachGravityObject(object =>
 			{
-				this.absForces[object.constructor.name + "Gravity"] = new Complex(0, 0);
-				this.absForces[object.constructor.name + "Normal"] = new Complex(0, 0);
+				this.relForces[object.constructor.name + "Gravity"] = new Complex(0, 0);
+				this.absForces.normal = new Complex(0, 0);
 			});
 		}
 	}

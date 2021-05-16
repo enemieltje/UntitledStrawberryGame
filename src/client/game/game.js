@@ -95,10 +95,15 @@ function onStart ()
 
 	GameData.getObjectFromName("ready").removeFromParent(app.stage);
 
-	GameData.getObjectArrayFromName("background").forEach(object =>
+	GameData.getObjectArrayFromName("stars").forEach(object =>
 	{
 		object.addToParent();
 	});
+
+	// GameData.getObjectArrayFromName("background").forEach(object =>
+	// {
+	// 	object.addToParent();
+	// });
 
 	GameData.getObjectArrayFromName("block").forEach(object =>
 	{
@@ -131,6 +136,10 @@ function walkTick (delta)
 	if (GameData.frame >= 60) GameData.frame = 0;
 
 	GameData.getObjectFromName("strawberry").step(delta);
+	GameData.getObjectArrayFromName("stars").forEach((stars) =>
+	{
+		stars.step(delta);
+	});
 	// GameData.getObjectFromName("planet").step(delta);
 	// GameData.getObjectArrayFromName("block").forEach((block) =>
 	// {

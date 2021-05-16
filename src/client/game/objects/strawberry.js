@@ -47,6 +47,8 @@ class Strawberry extends MovingObject
 	walkSetup ()
 	{
 		this.relForces.walk = new Complex(0, 0);
+		// this.isWalking = true;
+		const decelleration = 0.15;
 
 		this.toggleGravity.press = () =>
 		{
@@ -62,7 +64,8 @@ class Strawberry extends MovingObject
 			{
 				if (this.canJump)
 				{
-					this.v = this.v.add(new Complex(0, -this.jumpHeight).mul(this.rotation));
+					this.relVy += -this.jumpHeight;
+					// this.v = this.v.add(new Complex(0, -this.jumpHeight).mul(this.rotation));
 					sounds["game/sounds/Boing.mp3"].play();
 				}
 			}
@@ -73,6 +76,7 @@ class Strawberry extends MovingObject
 			if (this.disableGravity)
 			{
 				this.relForces.walk.im = 0;
+				this.relVy *= decelleration;
 				if (this.walkDown.isDown) this.walkDown.press();
 			}
 		};
@@ -87,6 +91,7 @@ class Strawberry extends MovingObject
 			if (this.disableGravity || this.canJump)
 			{
 				this.relForces.walk.re = 0;
+				this.relVx *= decelleration;
 				if (this.walkRight.isDown) this.walkRight.press();
 			}
 		};
@@ -104,6 +109,7 @@ class Strawberry extends MovingObject
 			if (this.disableGravity)
 			{
 				this.relForces.walk.im = 0;
+				this.relVy *= decelleration;
 				if (this.walkUp.isDown) this.walkUp.press();
 			}
 		};
@@ -118,6 +124,7 @@ class Strawberry extends MovingObject
 			if (this.disableGravity || this.canJump)
 			{
 				this.relForces.walk.re = 0;
+				this.relVx *= decelleration;
 				if (this.walkLeft.isDown) this.walkLeft.press();
 			}
 		};
