@@ -1,11 +1,8 @@
-class Stars extends GameObject
+class Stars extends LinearParallax
 {
-	constructor (sprite)
+	constructor (sprites)
 	{
-		super([sprite]);
-		this.sprite.x = viewport.x;
-		this.sprite.y = viewport.x;
-		this.sprite.scale.set(2);
+		super(sprites, 0.01, 1);
 	}
 
 	static onLoad ()
@@ -15,16 +12,11 @@ class Stars extends GameObject
 
 	static create ()
 	{
-		for (let i = 0; i < 4; i++)
-		{
-			const stars = new Stars(GameData.getSprite(`stars.json`)[i]);
-			GameData.storeObject(stars, "stars");
-		}
-	}
-
-	step (_delta)
-	{
-
+		// for (let i = 0; i < 4; i++)
+		// {
+		const stars = new Stars(GameData.getSprite(`stars.json`));
+		GameData.storeObject(stars, "stars");
+		// }
 	}
 }
 
