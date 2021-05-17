@@ -52,6 +52,8 @@ class GameData
 		Object.keys(this.debugShapes).forEach((shapeName) =>
 		{
 			viewport.removeChild(this.debugShapes[shapeName].shape);
+			this.debugShapes[shapeName].shape.destroy();
+			delete this.debugShapes[shapeName];
 		});
 	}
 

@@ -1,6 +1,6 @@
 class Melon extends GravityObject
 {
-	static name = "planet";
+	// static name = "melon";
 	gravityProperties;
 
 	constructor ()
@@ -12,7 +12,7 @@ class Melon extends GravityObject
 			atmosphereRadius: 9000,
 			atmosphereDensity: 1
 		};
-		super(properties, `planet.png`);
+		super(properties, "empty.png");
 		// this.applyPhisics = true;
 	}
 
@@ -27,12 +27,12 @@ class Melon extends GravityObject
 
 	static onLoad ()
 	{
-		super.onLoad([`${this.name}.png`]);
+		// super.onLoad([`${this.name}.png`]);
 	}
 
 	static create ()
 	{
-		GameData.storeObject(new Melon(), this.name);
+		GameData.storeObject(new Melon(), "melon");
 	}
 }
 

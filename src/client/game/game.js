@@ -110,16 +110,14 @@ function onStart ()
 		object.addToParent();
 	});
 
-	GameData.getObjectFromName("planet").addToParent();
+	GameData.getObjectFromName("melon").addToParent();
 	GameData.getObjectFromName("strawberry").addToParent();
-	// viewport.addChild(GameData.getObjectFromName("follower"));
-	// viewport.follow(GameData.getObjectFromName("follower"), {radius: 192});
 
 	BeepBox = sounds["game/sounds/BeepBox-Song.mp3"];
 	BeepBox.play();
 	BeepBox.volume = 0.25;
 	sounds["game/sounds/Boing.mp3"].volume = 0.5;
-	GameData.getObjectFromName("planet").drawShape();
+	GameData.getObjectFromName("melon").drawShape();
 	GameData.drawDebugScreen();
 }
 

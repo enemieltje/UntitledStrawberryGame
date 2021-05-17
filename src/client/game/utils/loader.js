@@ -73,8 +73,8 @@ class Loader
 		return new Promise(resolve =>
 		{
 
-			// console.log(`loading sprite: empty.png`);
-			// app.loader.add(`game/sprites/empty.png`);
+			console.log(`loading sprite: empty.png`);
+			app.loader.add(`game/sprites/empty.png`);
 			Loader.objectTypes.forEach(object =>
 			{
 				object.onLoad();

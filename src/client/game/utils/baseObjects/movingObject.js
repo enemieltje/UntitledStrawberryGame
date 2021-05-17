@@ -91,6 +91,7 @@ class MovingObject extends StaticObject
 		this.updateChunk();
 		this.fixCollision();
 		this.updateSprite();
+		this.setParentBody();
 
 		this.drawDebugArrows();
 	}
@@ -404,7 +405,7 @@ class MovingObject extends StaticObject
 		return a;
 	}
 
-	getClosestGravityObject ()
+	setParentBody ()
 	{
 		let leastDistance;
 		let id;
@@ -419,6 +420,7 @@ class MovingObject extends StaticObject
 			}
 		});
 
-		return id ? GameData.getObjectFromId(id) : undefined;
+		this._distance = leastDistance;
+		this.parentBody = id ? GameData.getObjectFromId(id) : undefined;
 	}
 }

@@ -21,10 +21,7 @@ class Parallax
 	{
 		this.layers.forEach((layer) =>
 		{
-			layer.sprites.forEach((sprite) =>
-			{
-				parent.addChild(sprite);
-			});
+			layer.addToParent(parent);
 		});
 	}
 
@@ -32,10 +29,7 @@ class Parallax
 	{
 		this.layers.forEach((layer) =>
 		{
-			layer.sprites.forEach((sprite) =>
-			{
-				parent.removeChild(sprite);
-			});
+			layer.removeFromParent(parent);
 		});
 	}
 
@@ -43,6 +37,8 @@ class Parallax
 	{
 		this.layers.forEach((layer) =>
 		{
+			// layer.deleteSprites();
+			// if (layer.drawShapes)
 			layer.updatePostitions();
 		});
 	}

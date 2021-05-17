@@ -10,18 +10,13 @@ class StaticObject extends GameObject
 	width;
 	height;
 	radius;
+	_distance;
 	parentBody;
 	isSprite = true;
 
 	constructor (properties, textures)
 	{
 		super(textures);
-		// this.pos = pos;
-		// this.rotation = rotation;
-		// this.width = hitBox.width;
-		// this.height = hitBox.height;
-		// this.radius = hitBox.radius;
-		// this.parentBody = parentBody;
 
 		Object.keys(properties).forEach((property) =>
 		{
@@ -70,6 +65,35 @@ class StaticObject extends GameObject
 	get vy ()
 	{
 		return 0;
+	}
+
+	get altitude ()
+	{
+		return this.distance - this.parentBody.radius;
+	}
+
+	set altitude (altitude)
+	{
+		this.distance = altitude + this.parentBody.radius;
+	}
+
+	get distance ()
+	{
+		return this._distance;
+	}
+
+	set distance (distance)
+	{
+		if (!this.parentBody) return;
+
+		// get a vector from the parent Body to this
+		const relPos = this.pos.sub(this.parentBody.center);
+
+		// create a new vector in the same direction, but with length distance
+		const newPos = new Complex({abs: distance, arg: relPos.arg()});
+
+		// add the parent body again to make it absolute coords and set the position
+		this.pos = newPos.add(this.parentBody.center);
 	}
 
 	updateSprite ()

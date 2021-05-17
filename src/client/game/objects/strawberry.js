@@ -259,15 +259,14 @@ class Strawberry extends MovingObject
 		GameData.debugShapes.viewport.enabled = false;
 		GameData.debugShapes.spritePos.enabled = false;
 		GameData.debugShapes.isFloating.enabled = false;
-		GameData.debugShapes.collisionChunks.enabled = true;
+		GameData.debugShapes.collisionChunks.enabled = false;
 	}
 
 	setRotation ()
 	{
 		if (!this.disableGravity)
 		{
-			const closestPlanet = this.getClosestGravityObject();
-			const relPos = closestPlanet.center.sub(this.center);
+			const relPos = this.parentBody.center.sub(this.center);
 
 			this.rotation = new Complex({arg: relPos.arg(), abs: 1}).div(new Complex(0, 1));
 		}
@@ -281,7 +280,7 @@ class Strawberry extends MovingObject
 		const avgAmount = 10;
 		if (this.fps.length >= avgAmount)
 			this.fps.shift();
-		this.fps.push(60 * delta);
+		this.fps.push(60 / delta);
 
 		let total = 0;
 		this.fps.forEach((value) =>
@@ -306,6 +305,8 @@ class Strawberry extends MovingObject
 		const relA = this.getRelA();
 		const relV = this.v.div(this.rotation);
 
+		GameData.addDebugText("parentBody", this.parentBody.constructor.name);
+		GameData.addDebugText("altitude", this.altitude);
 		GameData.addDebugText("fps", this.getFPS(delta));
 		GameData.addDebugText("zoom", viewport.scale.x);
 		GameData.addDebugText("rotation", this.rotation.arg());

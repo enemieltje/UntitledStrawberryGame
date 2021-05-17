@@ -2,7 +2,7 @@ class Stars extends LinearParallax
 {
 	constructor (sprites)
 	{
-		super(sprites, 0.01, 1);
+		super(sprites, 0.01, 2);
 	}
 
 	static onLoad ()
